@@ -1,6 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
-// apply plugin: 'findbugs'
+apply plugin: 'findbugs'
 
 repositories {
     mavenCentral()
@@ -20,10 +20,10 @@ task copyAllDependencies(type: Copy) {
     into 'allLibs'
 }
 
-/* findbugs {
+findbugs {
     effort = "max"
     reportLevel = "low"
-    toolVersion = "2.0.3"
+    toolVersion = "3.0.0"
 }
 
 tasks.withType(FindBugs) {
@@ -31,7 +31,7 @@ tasks.withType(FindBugs) {
         xml.enabled = false
         html.enabled = true
     }
-} */
+}
 
 /* Generate gradlew and gradle wrappers for portable gradle use */
 task wrapper(type: Wrapper) {
