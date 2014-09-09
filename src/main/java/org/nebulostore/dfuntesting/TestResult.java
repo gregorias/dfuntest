@@ -1,24 +1,23 @@
 package org.nebulostore.dfuntesting;
 
 public class TestResult {
-	private final Type type_;
-	private final String description_;
+  private final Type mType;
+  private final String mDescription;
 
-	public TestResult(Type type, String description) {
-		type_ = type;
-		description_ = description;
-	}
-	
-	public Type getType() {
-		return type_;
-	}
-	
-	public String getDescription() {
-		return description_;
-	}
-	
-	public enum Type {
-		SUCCESS,
-		FAILURE
-	};
+  public TestResult(Type type, String description) {
+    mType = type;
+    mDescription = description;
+  }
+
+  public Type getType() {
+    return mType;
+  }
+
+  public String getDescription() {
+    return mDescription;
+  }
+
+  public enum Type {
+    SUCCESS, FAILURE
+  };
 }

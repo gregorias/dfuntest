@@ -8,11 +8,11 @@ import java.nio.charset.Charset;
 import org.nebulostore.dfuntesting.CommandResult;
 
 public final class ProcessUtils {
-  public static CommandResult runProcess(Process p) throws InterruptedException, IOException {
-    int exitCode = p.waitFor();
-    try (InputStreamReader stdOut = new InputStreamReader(p.getInputStream(),
+  public static CommandResult runProcess(Process process) throws InterruptedException, IOException {
+    int exitCode = process.waitFor();
+    try (InputStreamReader stdOut = new InputStreamReader(process.getInputStream(),
         Charset.defaultCharset())) {
-      try (InputStreamReader stdErr = new InputStreamReader(p.getErrorStream(),
+      try (InputStreamReader stdErr = new InputStreamReader(process.getErrorStream(),
           Charset.defaultCharset())) {
         CharBuffer stdOutBuf = CharBuffer.wrap(new StringBuilder());
         CharBuffer stdErrBuf = CharBuffer.wrap(new StringBuilder());

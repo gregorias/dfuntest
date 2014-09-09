@@ -19,26 +19,27 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
   private static final String ENV_CONFIG_ROOT_DIR = "root-dir";
   private static final String DEFAULT_DIR_PREFIX = "dfuntesting";
 
-  private final Configuration config_;
+  private final Configuration mConfig;
 
   public LocalEnvironmentFactory(Configuration config) {
-    config_ = config;
+    mConfig = config;
   }
 
   @Override
   public Collection<Environment> createEnvironments() throws IOException {
     LOGGER.info("createEnvironments()");
-    int count = config_.getInteger(XML_ENV_CNT_FIELD, 0);
+    int count = mConfig.getInteger(XML_ENV_CNT_FIELD, 0);
     if (count <= 0) {
-      throw new IllegalArgumentException("Number of environments has not been provided or was invalid.");
+      throw new IllegalArgumentException(
+          "Number of environments has not been provided or was invalid.");
     }
-    String dirPrefix = config_.getString(XML_ENV_DIR_FIELD, DEFAULT_DIR_PREFIX);
+    String dirPrefix = mConfig.getString(XML_ENV_DIR_FIELD, DEFAULT_DIR_PREFIX);
     
     Collection<Environment> environments = new LinkedList<>();
-    for (int i = 0; i < count; ++i) {
+    for (int envIdx = 0; envIdx < count; ++envIdx) {
       Path tempDirPath;
       tempDirPath = Files.createTempDirectory(dirPrefix);
-      LocalEnvironment env = new LocalEnvironment(i, tempDirPath);
+      LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath);
       env.setProperty(ENV_CONFIG_ROOT_DIR, tempDirPath);
       environments.add(env);
     }

@@ -9,20 +9,20 @@ import java.util.Map;
  * @author Grzegorz Milka
  */
 public abstract class AbstractConfigurationEnvironment implements Environment {
-  private final Map<String, Object> config_;
+  private final Map<String, Object> mConfig;
   
   public AbstractConfigurationEnvironment() {
-    config_ = new HashMap<>();
+    mConfig = new HashMap<>();
   }
 
   @Override
   public Object getProperty(String key) {
-    return config_.get(key);
+    return mConfig.get(key);
   }
 
 
   @Override
   public void setProperty(String key, Object value) {
-    config_.put(key, value);
+    mConfig.put(key, value);
   }
 }

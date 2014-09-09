@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This class given collection of environments prepares their configuration so that application can be run.
+ * This class given collection of environments prepares their configuration so
+ * that application can be run.
  * 
  * @author Grzegorz Milka
  */

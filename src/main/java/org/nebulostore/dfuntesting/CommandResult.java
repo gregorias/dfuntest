@@ -1,25 +1,25 @@
 package org.nebulostore.dfuntesting;
 
 public class CommandResult {
-  private final int exitCode_;
-  private final String stdOut_;
-  private final String stdErr_;
+  private final int mExitCode;
+  private final String mStdOut;
+  private final String mStdErr;
   
   public CommandResult(int exitCode, String stdOut, String stdErr) {
-    exitCode_ = exitCode;
-    stdOut_ = stdOut;
-    stdErr_ = stdErr;
+    mExitCode = exitCode;
+    mStdOut = stdOut;
+    mStdErr = stdErr;
   }
   
   public int getExitCode() {
-    return exitCode_;
+    return mExitCode;
   }
   
   public String getStdOut() {
-    return stdOut_;
+    return mStdOut;
   }
   
   public String getStdErr() {
-    return stdErr_;
+    return mStdErr;
   }
 }

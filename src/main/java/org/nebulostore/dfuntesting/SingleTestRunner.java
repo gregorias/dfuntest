@@ -9,70 +9,71 @@ import org.nebulostore.dfuntesting.TestResult.Type;
 import org.slf4j.Logger;
 
 /**
- * Basic implementation of TestRunner which runs one test script on given environments and apps.
+ * Basic implementation of TestRunner which runs one test script on given
+ * environments and apps.
  * 
  * @author Grzegorz Milka
- *
- * @param <TestedApp>
+ * 
+ * @param <TestedAppT>
  */
-public class SingleTestRunner<TestedApp extends App> implements TestRunner {
-	private final Logger logger_;
-	private final TestScript<TestedApp> script_;
+public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
+  private final Logger mLogger;
+  private final TestScript<TestedAppT> mScript;
 
-	private final EnvironmentFactory environmentFactory_;
+  private final EnvironmentFactory mEnvironmentFactory;
 
-	private final EnvironmentPreparator environmentPreparator_;
+  private final EnvironmentPreparator mEnvironmentPreparator;
 
-	private final ApplicationFactory<TestedApp> applicationFactory_;
+  private final ApplicationFactory<TestedAppT> mApplicationFactory;
 
-	public SingleTestRunner(TestScript<TestedApp> script,
-			Logger logger,
-			EnvironmentFactory environmentFactory,
-			EnvironmentPreparator environmentPreparator,
-			ApplicationFactory<TestedApp> applicationFactory) {
-		script_ = script;
+  public SingleTestRunner(TestScript<TestedAppT> script, Logger logger,
+      EnvironmentFactory environmentFactory,
+      EnvironmentPreparator environmentPreparator,
+      ApplicationFactory<TestedAppT> applicationFactory) {
+    mScript = script;
 
-		logger_ = logger;
+    mLogger = logger;
 
-		environmentFactory_ = environmentFactory;
+    mEnvironmentFactory = environmentFactory;
 
-		environmentPreparator_ = environmentPreparator;
+    mEnvironmentPreparator = environmentPreparator;
 
-		applicationFactory_ = applicationFactory;
-	}
+    mApplicationFactory = applicationFactory;
+  }
 
-	@Override
-	public TestResult run() {
-		logger_.info("run(): Starting preparation for test script {}.", script_.toString());
-		logger_.info("run(): Creating environments.");
-		Collection<Environment> envs;
+  @Override
+  public TestResult run() {
+    mLogger.info("run(): Starting preparation for test script {}.",
+        mScript.toString());
+    mLogger.info("run(): Creating environments.");
+    Collection<Environment> envs;
     try {
-      envs = environmentFactory_.createEnvironments();
+      envs = mEnvironmentFactory.createEnvironments();
     } catch (IOException e) {
-      logger_.error("run(): Could not create environments.", e);
-			return new TestResult(Type.FAILURE, "Could not create environments.");
+      mLogger.error("run(): Could not create environments.", e);
+      return new TestResult(Type.FAILURE, "Could not create environments.");
     }
-		try {
-      logger_.info("run(): Preparing environments.");
-			environmentPreparator_.prepareEnvironments(envs);
-			logger_.info("run(): Environments prepared: ", envs.size());
-		} catch (ExecutionException e) {
-			logger_.error("run(): Could not prepare environments.", e);
-			environmentFactory_.destroyEnvironments(envs);
-			return new TestResult(Type.FAILURE, "Could not prepare environments.");
-		}
+    try {
+      mLogger.info("run(): Preparing environments.");
+      mEnvironmentPreparator.prepareEnvironments(envs);
+      mLogger.info("run(): Environments prepared: ", envs.size());
+    } catch (ExecutionException e) {
+      mLogger.error("run(): Could not prepare environments.", e);
+      mEnvironmentFactory.destroyEnvironments(envs);
+      return new TestResult(Type.FAILURE, "Could not prepare environments.");
+    }
 
-		Collection<TestedApp> apps = new LinkedList<>();
-		for (Environment env: envs) {
-			apps.add(applicationFactory_.newApp(env));
-		}
+    Collection<TestedAppT> apps = new LinkedList<>();
+    for (Environment env : envs) {
+      apps.add(mApplicationFactory.newApp(env));
+    }
 
-		TestResult result = script_.run(apps);
-		
-		environmentPreparator_.collectOutputAndLogFiles(envs);
-		environmentPreparator_.cleanEnvironments(envs);
-		environmentFactory_.destroyEnvironments(envs);
+    TestResult result = mScript.run(apps);
 
-		return result;
-	}
+    mEnvironmentPreparator.collectOutputAndLogFiles(envs);
+    mEnvironmentPreparator.cleanEnvironments(envs);
+    mEnvironmentFactory.destroyEnvironments(envs);
+
+    return result;
+  }
 }
