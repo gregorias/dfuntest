@@ -1,5 +1,12 @@
 package org.nebulostore.dfuntesting;
 
+/**
+ * Exception thrown when a command has failed.
+ *
+ * Command can be an operating system process, remote application instruction etc.
+ *
+ * @author Grzegorz Milka
+ */
 public class CommandException extends Exception {
   private static final long serialVersionUID = 1L;
 
