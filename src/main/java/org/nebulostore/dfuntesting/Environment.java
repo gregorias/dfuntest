@@ -46,11 +46,11 @@ public interface Environment {
    * Synchronously runs arbitrary command on this environment's OS.
    *
    * @param command
-   * @return
+   * @return Finished process.
    * @throws CommandException
    * @throws InterruptedException
    */
-  CommandResult runCommand(List<String> command) throws CommandException, InterruptedException;
+  Process runCommand(List<String> command) throws CommandException, InterruptedException;
 
   Process runCommandAsynchronously(List<String> command) throws CommandException;
 

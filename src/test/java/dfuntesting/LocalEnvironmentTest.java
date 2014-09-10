@@ -15,7 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.nebulostore.dfuntesting.CommandException;
-import org.nebulostore.dfuntesting.CommandResult;
 import org.nebulostore.dfuntesting.Environment;
 import org.nebulostore.dfuntesting.LocalEnvironment;
 
@@ -32,7 +31,6 @@ public class LocalEnvironmentTest {
     mLocalDir = Files.createTempDirectory(null);
 
     mLocalEnvironment = new LocalEnvironment(0, mEnvDir);
-
   }
 
   @After
@@ -50,9 +48,9 @@ public class LocalEnvironmentTest {
     commands.add("touch");
     commands.add(PREFIX);
 
-    CommandResult result = mLocalEnvironment.runCommand(commands);
+    Process finishedProcess = mLocalEnvironment.runCommand(commands);
     Path envFile = mEnvDir.resolve(PREFIX);
-    assertTrue(result.getExitCode() == 0);
+    assertTrue(finishedProcess.exitValue() == 0);
     assertTrue(Files.exists(envFile));
     Files.deleteIfExists(envFile);
   }

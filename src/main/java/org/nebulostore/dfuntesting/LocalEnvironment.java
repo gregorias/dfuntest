@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.nebulostore.dfuntesting.utils.ProcessUtils;
 
 public class LocalEnvironment extends AbstractConfigurationEnvironment {
   private final int mId;
@@ -66,7 +65,7 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   }
 
   @Override
-  public CommandResult runCommand(List<String> command) throws
+  public Process runCommand(List<String> command) throws
       CommandException,
       InterruptedException {
     ProcessBuilder pb = new ProcessBuilder();
@@ -78,11 +77,8 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
     } catch (IOException e) {
       throw new CommandException(e);
     }
-    try {
-      return ProcessUtils.runProcess(process);
-    } catch (IOException e) {
-      throw new CommandException(e);
-    }
+    process.waitFor();
+    return process;
   }
 
   @Override
