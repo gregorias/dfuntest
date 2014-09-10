@@ -54,7 +54,19 @@ public interface Environment {
 
   Process runCommandAsynchronously(List<String> command) throws CommandException;
 
+  /**
+   * Removes specified file. If path targets a directory its content is removed as well.
+   *
+   * @param relPath Relative path to file on this environment.
+   * @throws IOException
+   */
   void removeFile(Path relPath) throws IOException;
 
+  /**
+   * Set arbitrary property of this environment.
+   *
+   * @param key
+   * @param value
+   */
   void setProperty(String key, Object value);
 }
