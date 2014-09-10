@@ -21,9 +21,6 @@ task copyAllDependencies(type: Copy) {
     into 'allLibs'
 }
 
-checkstyle {
-}
-
 findbugs {
     effort = "max"
     reportLevel = "low"
