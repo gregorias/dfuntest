@@ -26,7 +26,8 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
 
   private final ApplicationFactory<TestedAppT> mApplicationFactory;
 
-  public SingleTestRunner(TestScript<TestedAppT> script, Logger logger,
+  public SingleTestRunner(TestScript<TestedAppT> script,
+      Logger logger,
       EnvironmentFactory environmentFactory,
       EnvironmentPreparator environmentPreparator,
       ApplicationFactory<TestedAppT> applicationFactory) {
@@ -43,8 +44,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
 
   @Override
   public TestResult run() {
-    mLogger.info("run(): Starting preparation for test script {}.",
-        mScript.toString());
+    mLogger.info("run(): Starting preparation for test script {}.", mScript.toString());
     mLogger.info("run(): Creating environments.");
     Collection<Environment> envs;
     try {
