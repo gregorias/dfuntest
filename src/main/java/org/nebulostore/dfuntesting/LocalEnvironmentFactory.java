@@ -12,6 +12,19 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Factory of {@link LocalEnvironment}.
+ *
+ * This factory uses {@link Configuration} to specify environment configuration.
+ * Configuration uses following fields:
+ * <ul>
+ * <li> environment-count - Number of local environments to create. </li>
+ * <li> dir-prefix - Temporary directory prefix used for creating local
+ *  environment in system's temporary directory. </li>
+ * </ul>
+ *
+ * @author Grzegorz Milka
+ */
 public class LocalEnvironmentFactory implements EnvironmentFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalEnvironmentFactory.class);
   private static final String XML_ENV_CNT_FIELD = "environment-count";
