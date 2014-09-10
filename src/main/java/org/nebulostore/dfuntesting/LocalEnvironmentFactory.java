@@ -34,7 +34,7 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
           "Number of environments has not been provided or was invalid.");
     }
     String dirPrefix = mConfig.getString(XML_ENV_DIR_FIELD, DEFAULT_DIR_PREFIX);
-    
+
     Collection<Environment> environments = new LinkedList<>();
     for (int envIdx = 0; envIdx < count; ++envIdx) {
       Path tempDirPath;

@@ -5,12 +5,12 @@ import java.util.Map;
 
 /**
  * Environment which implements configuration settings.
- * 
+ *
  * @author Grzegorz Milka
  */
 public abstract class AbstractConfigurationEnvironment implements Environment {
   private final Map<String, Object> mConfig;
-  
+
   public AbstractConfigurationEnvironment() {
     mConfig = new HashMap<>();
   }

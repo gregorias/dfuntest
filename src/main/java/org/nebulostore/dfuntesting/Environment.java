@@ -27,7 +27,7 @@ public interface Environment {
    * @throws IOException
    */
   void copyFilesToLocalDisk(Path srcRelPath, Path destPath) throws IOException;
-  
+
   /**
    * @return Hostname of this environment. May be IP address, WWW address etc.
    */

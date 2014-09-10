@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 /**
  * Basic implementation of TestRunner which runs one test script on given
  * environments and apps.
- * 
+ *
  * @author Grzegorz Milka
- * 
+ *
  * @param <TestedAppT>
  */
 public class SingleTestRunner<TestedAppT extends App> implements TestRunner {

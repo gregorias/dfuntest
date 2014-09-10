@@ -23,16 +23,16 @@ public class LocalEnvironmentTest {
   private static final String PREFIX = "NEBTMP";
   private Path mEnvDir;
   private Path mLocalDir;
-  
+
   private Environment mLocalEnvironment;
 
   @Before
   public void setUp() throws IOException {
     mEnvDir = Files.createTempDirectory(null);
     mLocalDir = Files.createTempDirectory(null);
-    
+
     mLocalEnvironment = new LocalEnvironment(0, mEnvDir);
-    
+
   }
 
   @After
@@ -40,8 +40,8 @@ public class LocalEnvironmentTest {
     FileUtils.deleteQuietly(mLocalDir.toFile());
     FileUtils.deleteQuietly(mEnvDir.toFile());
   }
-  
-  @Test 
+
+  @Test
   public void shouldCreateFileUsingTouchProcess() throws
       CommandException,
       InterruptedException,
@@ -49,14 +49,14 @@ public class LocalEnvironmentTest {
     List<String> commands = new LinkedList<>();
     commands.add("touch");
     commands.add(PREFIX);
-    
+
     CommandResult result = mLocalEnvironment.runCommand(commands);
     Path envFile = mEnvDir.resolve(PREFIX);
     assertTrue(result.getExitCode() == 0);
     assertTrue(Files.exists(envFile));
     Files.deleteIfExists(envFile);
   }
-  
+
   @Test
   public void shouldCopyDirFromLocalDir() throws IOException {
     Path localFile = Files.createTempDirectory(mLocalDir, PREFIX);
@@ -66,7 +66,7 @@ public class LocalEnvironmentTest {
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
   }
-  
+
   @Test
   public void shouldCopyFileFromLocalDir() throws IOException {
     Path localFile = Files.createTempFile(mLocalDir, PREFIX, "");
@@ -76,7 +76,7 @@ public class LocalEnvironmentTest {
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
   }
-  
+
   @Test
   public void shouldCopyDirToLocalDir() throws IOException {
     Path envFile = Files.createTempDirectory(mEnvDir, PREFIX);
@@ -86,7 +86,7 @@ public class LocalEnvironmentTest {
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
   }
-  
+
   @Test
   public void shouldCopyFileToLocalDir() throws IOException {
     Path envFile = Files.createTempFile(mEnvDir, PREFIX, "");
@@ -96,7 +96,7 @@ public class LocalEnvironmentTest {
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
   }
-  
+
   @Test
   public void shouldRemoveFile() throws IOException {
     Path envFile = Files.createTempFile(mEnvDir, PREFIX, "");
@@ -104,5 +104,5 @@ public class LocalEnvironmentTest {
     mLocalEnvironment.removeFile(envFile.getFileName());
     assertFalse(Files.exists(envFile));
   }
-  
+
 }
