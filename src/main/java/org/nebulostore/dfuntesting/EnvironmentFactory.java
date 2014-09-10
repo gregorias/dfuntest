@@ -14,7 +14,7 @@ public interface EnvironmentFactory {
   /**
    * Cleans up everything created by createEnvironments.
    *
-   * @param env - environments created by createEnvironments.
+   * @param envs - environments created by createEnvironments.
    */
   void destroyEnvironments(Collection<Environment> envs);
 }
