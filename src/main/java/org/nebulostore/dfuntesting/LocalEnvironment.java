@@ -21,7 +21,7 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   public void copyFilesFromLocalDisk(Path srcPath, Path destRelPath) throws IOException {
     Path destPath = mDir.resolve(destRelPath);
     if (!Files.exists(destPath)) {
-      Files.createDirectory(destPath);
+      Files.createDirectories(destPath);
     } else if (!Files.isDirectory(destPath)) {
       throw new IOException(
           "Destination path exists and it is not a directory.");
@@ -37,7 +37,7 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   public void copyFilesToLocalDisk(Path srcRelPath, Path destPath) throws IOException {
     Path srcPath = mDir.resolve(srcRelPath);
     if (!Files.exists(destPath)) {
-      Files.createDirectory(destPath);
+      Files.createDirectories(destPath);
     } else if (!Files.isDirectory(destPath)) {
       throw new IOException(
           "Destination path exists and it is not a directory.");

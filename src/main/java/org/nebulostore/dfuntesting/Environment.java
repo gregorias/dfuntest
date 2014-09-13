@@ -16,14 +16,14 @@ public interface Environment {
 
   /**
    * @param srcPath Local source path.
-   * @param destRelPath Relative destination path on this environment.
+   * @param destRelPath Relative destination directory on this environment.
    * @throws IOException
    */
   void copyFilesFromLocalDisk(Path srcPath, Path destRelPath) throws IOException;
 
   /**
    * @param srcRelPath Relative source path on this environment.
-   * @param destPath Local destination path.
+   * @param destPath Local destination directory.
    * @throws IOException
    */
   void copyFilesToLocalDisk(Path srcRelPath, Path destPath) throws IOException;
