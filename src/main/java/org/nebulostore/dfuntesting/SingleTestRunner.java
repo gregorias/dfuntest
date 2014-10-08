@@ -70,6 +70,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
 
     TestResult result = mScript.run(apps);
 
+    mLogger.info("run(): Collecting output and log files.");
     mEnvironmentPreparator.collectOutputAndLogFiles(envs);
     mEnvironmentPreparator.cleanEnvironments(envs);
     mEnvironmentFactory.destroyEnvironments(envs);

@@ -5,3 +5,6 @@ build
 .gradle
 .project
 .settings
+
+*.iml
+*.swp
