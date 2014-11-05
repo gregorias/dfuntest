@@ -58,7 +58,6 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
     String privateKeyString = mConfig.getString(XML_ENV_PRIVATE_KEY_FIELD);
     Path privateKeyPath = FileSystems.getDefault().getPath(privateKeyString);
     String remoteDir = mConfig.getString(XML_ENV_DIR_FIELD, DEFAULT_REMOTE_DIR);
-    Path remoteDirPath = FileSystems.getDefault().getPath(remoteDir);
 
     Collection<Environment> environments = new LinkedList<>();
     for (int envIdx = 0; envIdx < hosts.size(); ++envIdx) {
@@ -68,7 +67,7 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
           username,
           privateKeyPath,
           InetAddress.getByName(hosts.get(envIdx).toString()),
-          remoteDirPath,
+          remoteDir,
           mExecutor);
       environments.add(env);
     }

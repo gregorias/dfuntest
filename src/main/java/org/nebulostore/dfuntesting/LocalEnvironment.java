@@ -1,6 +1,8 @@
 package org.nebulostore.dfuntesting;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -18,7 +20,7 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   }
 
   @Override
-  public void copyFilesFromLocalDisk(Path srcPath, Path destRelPath) throws IOException {
+  public void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException {
     Path destPath = mDir.resolve(destRelPath);
     if (!Files.exists(destPath)) {
       Files.createDirectories(destPath);
@@ -34,7 +36,7 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   }
 
   @Override
-  public void copyFilesToLocalDisk(Path srcRelPath, Path destPath) throws IOException {
+  public void copyFilesToLocalDisk(String srcRelPath, Path destPath) throws IOException {
     Path srcPath = mDir.resolve(srcRelPath);
     if (!Files.exists(destPath)) {
       Files.createDirectories(destPath);
@@ -65,39 +67,57 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
   }
 
   @Override
-  public Process runCommand(List<String> command) throws
-      CommandException,
-      InterruptedException {
-    ProcessBuilder pb = new ProcessBuilder();
-    pb.command(command);
-    pb.directory(mDir.toFile());
-    Process process;
-    try {
-      process = pb.start();
-    } catch (IOException e) {
-      throw new CommandException(e);
-    }
+  public RemoteProcess runCommand(List<String> command) throws InterruptedException, IOException {
+    RemoteProcess process = runCommandAsynchronously(command);
     process.waitFor();
     return process;
   }
 
   @Override
-  public Process runCommandAsynchronously(List<String> command) throws
-      CommandException {
+  public RemoteProcess runCommandAsynchronously(List<String> command) throws IOException {
     ProcessBuilder pb = new ProcessBuilder();
     pb.command(command);
     pb.directory(mDir.toFile());
     Process process;
-    try {
-      process = pb.start();
-    } catch (IOException e) {
-      throw new CommandException(e);
-    }
-    return process;
+    process = pb.start();
+    return new ProcessAdapter(process);
   }
 
   @Override
-  public void removeFile(Path relPath) {
+  public void removeFile(String relPath) {
     FileUtils.deleteQuietly(mDir.resolve(relPath).toFile());
+  }
+
+  private static class ProcessAdapter implements RemoteProcess {
+    private final Process mProcess;
+
+    public ProcessAdapter(Process process) {
+      mProcess = process;
+    }
+
+    @Override
+    public void destroy() {
+      mProcess.destroy();
+    }
+
+    @Override
+    public InputStream getErrorStream() {
+      return mProcess.getErrorStream();
+    }
+
+    @Override
+    public InputStream getInputStream() {
+      return mProcess.getInputStream();
+    }
+
+    @Override
+    public OutputStream getOutputStream() {
+      return mProcess.getOutputStream();
+    }
+
+    @Override
+    public int waitFor() throws InterruptedException {
+      return mProcess.waitFor();
+    }
   }
 }

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -17,6 +16,7 @@ import org.junit.Test;
 import org.nebulostore.dfuntesting.CommandException;
 import org.nebulostore.dfuntesting.Environment;
 import org.nebulostore.dfuntesting.LocalEnvironment;
+import org.nebulostore.dfuntesting.RemoteProcess;
 
 public class LocalEnvironmentTest {
   private static final String PREFIX = "NEBTMP";
@@ -48,9 +48,9 @@ public class LocalEnvironmentTest {
     commands.add("touch");
     commands.add(PREFIX);
 
-    Process finishedProcess = mLocalEnvironment.runCommand(commands);
+    RemoteProcess finishedProcess = mLocalEnvironment.runCommand(commands);
     Path envFile = mEnvDir.resolve(PREFIX);
-    assertTrue(finishedProcess.exitValue() == 0);
+    assertTrue(finishedProcess.waitFor() == 0);
     assertTrue(Files.exists(envFile));
     Files.deleteIfExists(envFile);
   }
@@ -59,7 +59,7 @@ public class LocalEnvironmentTest {
   public void shouldCopyDirFromLocalDir() throws IOException {
     Path localFile = Files.createTempDirectory(mLocalDir, PREFIX);
     Path envFile = mLocalDir.resolve(localFile.getFileName());
-    mLocalEnvironment.copyFilesFromLocalDisk(localFile, FileSystems.getDefault().getPath("."));
+    mLocalEnvironment.copyFilesFromLocalDisk(localFile, ".");
     assertTrue(Files.exists(envFile));
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
@@ -69,7 +69,7 @@ public class LocalEnvironmentTest {
   public void shouldCopyFileFromLocalDir() throws IOException {
     Path localFile = Files.createTempFile(mLocalDir, PREFIX, "");
     Path envFile = mLocalDir.resolve(localFile.getFileName());
-    mLocalEnvironment.copyFilesFromLocalDisk(localFile, FileSystems.getDefault().getPath("."));
+    mLocalEnvironment.copyFilesFromLocalDisk(localFile, ".");
     assertTrue(Files.exists(envFile));
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
@@ -79,7 +79,7 @@ public class LocalEnvironmentTest {
   public void shouldCopyDirToLocalDir() throws IOException {
     Path envFile = Files.createTempDirectory(mEnvDir, PREFIX);
     Path localFile = mLocalDir.resolve(envFile.getFileName());
-    mLocalEnvironment.copyFilesToLocalDisk(envFile.getFileName(), mLocalDir);
+    mLocalEnvironment.copyFilesToLocalDisk(envFile.toString(), mLocalDir);
     assertTrue(Files.exists(localFile));
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
@@ -89,17 +89,17 @@ public class LocalEnvironmentTest {
   public void shouldCopyFileToLocalDir() throws IOException {
     Path envFile = Files.createTempFile(mEnvDir, PREFIX, "");
     Path localFile = mLocalDir.resolve(envFile.getFileName());
-    mLocalEnvironment.copyFilesToLocalDisk(envFile.getFileName(), mLocalDir);
+    mLocalEnvironment.copyFilesToLocalDisk(envFile.toString(), mLocalDir);
     assertTrue(Files.exists(localFile));
     Files.deleteIfExists(envFile);
     Files.deleteIfExists(localFile);
   }
 
   @Test
-  public void shouldRemoveFile() throws IOException {
+  public void shouldRemoveFile() throws InterruptedException, IOException {
     Path envFile = Files.createTempFile(mEnvDir, PREFIX, "");
     assertTrue(Files.exists(envFile));
-    mLocalEnvironment.removeFile(envFile.getFileName());
+    mLocalEnvironment.removeFile(envFile.toString());
     assertFalse(Files.exists(envFile));
   }
 

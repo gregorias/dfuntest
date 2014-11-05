@@ -19,14 +19,14 @@ public interface Environment {
    * @param destRelPath Relative destination directory on this environment.
    * @throws IOException
    */
-  void copyFilesFromLocalDisk(Path srcPath, Path destRelPath) throws IOException;
+  void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException;
 
   /**
    * @param srcRelPath Relative source path on this environment.
    * @param destPath Local destination directory.
    * @throws IOException
    */
-  void copyFilesToLocalDisk(Path srcRelPath, Path destPath) throws IOException;
+  void copyFilesToLocalDisk(String srcRelPath, Path destPath) throws IOException;
 
   /**
    * @return Hostname of this environment. May be IP address, WWW address etc.
@@ -50,9 +50,9 @@ public interface Environment {
    * @throws CommandException
    * @throws InterruptedException
    */
-  Process runCommand(List<String> command) throws CommandException, InterruptedException;
+  RemoteProcess runCommand(List<String> command) throws InterruptedException, IOException;
 
-  Process runCommandAsynchronously(List<String> command) throws CommandException;
+  RemoteProcess runCommandAsynchronously(List<String> command) throws IOException;
 
   /**
    * Removes specified file. If path targets a directory its content is removed as well.
@@ -60,7 +60,7 @@ public interface Environment {
    * @param relPath Relative path to file on this environment.
    * @throws IOException
    */
-  void removeFile(Path relPath) throws IOException;
+  void removeFile(String relPath) throws InterruptedException, IOException;
 
   /**
    * Set arbitrary property of this environment.
