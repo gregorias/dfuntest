@@ -1,4 +1,4 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 /**
  * Exception thrown when a command has failed.

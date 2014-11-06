@@ -1,4 +1,4 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,7 +30,7 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
   private static final String XML_ENV_CNT_FIELD = "environment-count";
   private static final String XML_ENV_DIR_FIELD = "dir-prefix";
   private static final String ENV_CONFIG_ROOT_DIR = "root-dir";
-  private static final String DEFAULT_DIR_PREFIX = "dfuntesting";
+  private static final String DEFAULT_DIR_PREFIX = "dfuntest";
 
   private final Configuration mConfig;
 

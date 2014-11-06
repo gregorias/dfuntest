@@ -1,4 +1,4 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,11 +1,10 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 
-import org.nebulostore.dfuntesting.TestResult.Type;
 import org.slf4j.Logger;
 
 /**
@@ -51,7 +50,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
       envs = mEnvironmentFactory.createEnvironments();
     } catch (IOException e) {
       mLogger.error("run(): Could not create environments.", e);
-      return new TestResult(Type.FAILURE, "Could not create environments.");
+      return new TestResult(TestResult.Type.FAILURE, "Could not create environments.");
     }
     try {
       mLogger.info("run(): Preparing environments.");
@@ -60,7 +59,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
     } catch (ExecutionException e) {
       mLogger.error("run(): Could not prepare environments.", e);
       mEnvironmentFactory.destroyEnvironments(envs);
-      return new TestResult(Type.FAILURE, "Could not prepare environments.");
+      return new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
     }
 
     Collection<TestedAppT> apps = new LinkedList<>();

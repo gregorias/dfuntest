@@ -1,4 +1,4 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 public interface ApplicationFactory<TestedApp extends App> {
   /**

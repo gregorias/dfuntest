@@ -1,4 +1,4 @@
-package org.nebulostore.dfuntesting;
+package me.gregorias.dfuntest;
 
 /**
  * A point of entry for running tests. This objects combines other classes that

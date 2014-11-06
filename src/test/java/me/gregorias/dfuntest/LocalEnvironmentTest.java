@@ -1,4 +1,4 @@
-package dfuntesting;
+package me.gregorias.dfuntest;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -13,10 +13,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.nebulostore.dfuntesting.CommandException;
-import org.nebulostore.dfuntesting.Environment;
-import org.nebulostore.dfuntesting.LocalEnvironment;
-import org.nebulostore.dfuntesting.RemoteProcess;
 
 public class LocalEnvironmentTest {
   private static final String PREFIX = "NEBTMP";
