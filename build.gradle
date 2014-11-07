@@ -29,6 +29,21 @@ compileTestJava {
     targetCompatibility = '1.7'
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+task sourceJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives sourceJar
+  archives javadocJar
+}
+
 task copyAllDependencies(type: Copy) {
     from configurations.runtime
     into DEPENDENCY_LIB_DIRECTORY
