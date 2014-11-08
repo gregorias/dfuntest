@@ -1,10 +1,24 @@
+// Properties ossrhUsername, signing.keyId and signing.secretKeyRingFile need to
+// be set in order to sign and upload archives.
+
+import groovy.swing.SwingBuilder
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
-def DEPENDENCY_LIB_DIRECTORY = "lib/"
+def DEPENDENCY_LIB_DIRECTORY = 'lib/'
+
+if (!hasProperty('ossrhUsername')) {
+  ext.ossrhUsername = ''
+}
+
+group = 'me.gregorias'
+version = '0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -65,4 +79,98 @@ tasks.withType(FindBugs) {
 /* Generate gradlew and gradle wrappers for portable gradle use */
 task wrapper(type: Wrapper) {
     gradleVersion = '2.1'
+}
+
+signing {
+  required { gradle.taskGraph.hasTask(uploadArchives) }
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment {
+        MavenDeployment deployment -> signing.signPom(deployment)
+      }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+        authentication(userName: ossrhUsername)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+        authentication(userName: ossrhUsername)
+      }
+
+      pom.project {
+        name 'dfuntest'
+        description 'Framework for distributed functional tests.'
+        url 'http://github.com/gregorias/dfuntest'
+
+        licenses {
+          license {
+            name 'The BSD 2-Clause License'
+            url 'http://opensource.org/licenses/BSD-2-Clause'
+          }
+        }
+
+        developers {
+          developer {
+            name 'Grzegorz Milka'
+            email 'grzegorzmilka@gmail.com'
+          }
+        }
+
+        scm {
+          connection 'scm:git:git@github.com:gregorias/dfuntest.git'
+          developerConnection 'scm:git:git@github.com:gregorias/dfuntest.git'
+          url 'git@github.com:gregorias/dfuntest.git'
+        }
+      }
+    }
+  }
+}
+
+def getPassword = { target ->
+  def pass = ''
+  def prompt = "\nPlease enter password for ${target}: "
+  if (System.console() == null) {
+    new SwingBuilder().edt {
+      dialog(modal: true,
+          title: 'Enter password',
+          alwaysOnTop: true,
+          resizable: false,
+          locationRelativeTo: null,
+          pack: true,
+          show: true
+      ) {
+        vbox {
+          label(text: prompt)
+          input = passwordField()
+          button(defaultButton: true, text: 'OK', actionPerformed: {
+            pass = input.password;
+            dispose();
+          })
+        }
+      }
+    }
+  } else {
+    pass = System.console().readPassword(prompt)
+    pass = new String(pass)
+  }
+  pass
+}
+
+gradle.taskGraph.beforeTask { taskGraph ->
+  if (taskGraph.project.name.equals('dfuntest')) {
+    if (taskGraph.equals(signArchives) &&
+        gradle.taskGraph.hasTask(uploadArchives)) {
+      ext."signing.password" = getPassword("PGP private key")
+    } else if (taskGraph.equals(uploadArchives)) {
+      def ossrhPassword = getPassword("OSSRH")
+      uploadArchives.repositories.mavenDeployer {
+        repository.authentication.password = ossrhPassword
+        snapshotRepository.authentication.password = ossrhPassword
+      }
+    }
+  }
 }
