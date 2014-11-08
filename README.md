@@ -2,9 +2,10 @@ Overview
 ========
 
 A simple framework for creating distributed functional tests. This library aims
-to be for distributed functional tests what unittest libraries are for unit tests.
-It provides equivalent of test scenarios, runners, initializers and dealocators in
-such a way that it is easy to configure new testing environment, generate a report etc.
+to be for distributed functional tests what unittest libraries are for unit
+tests.  It provides equivalent of test scenarios, runners, initializers and
+dealocators in such a way that it is easy to configure new testing environment,
+generate a report etc.
 
 It is better than using bash/python scripts for such tasks, because:
 
@@ -21,18 +22,25 @@ Building
 
 dfuntest uses gradle with java plugin for typical java build operations.
 
+
+
 Usage
 =====
 
+dfuntest architecture is based on easily implementable interfaces, some of which
+are provided by dfuntest and others need to be implemented to fit into
+project's idiosyncrasies.
+
+![Interface architecture](doc/dfuntest.jpg)
+
 To use dfuntest you need to first prepare your project:
 
-* Define your own EnvironmentPreparator which prepares environment on which
-  your application is run.
+* Define your own EnvironmentPreparator, ApplicationFactory which prepare
+  environment on which your application is run.
 * Write App implementation which acts as a proxy to your application's
   interface.
-
-Having the above the only thing you need to write is TestScript for each 
-test you have and run TestRunner with those TestScripts.
+* For each test scenario write a TestScript.
+* Run tests using available TestRunners or define your own.
 
 History
 =======
