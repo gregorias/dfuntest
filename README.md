@@ -17,15 +17,14 @@ It is better than using bash/python scripts for such tasks, because:
 * Allows you not to worry about how to correctly set up environment when
   writing each test.
 
-Building
-========
-
-dfuntest uses gradle with java plugin for typical java build operations.
-
-
-
 Usage
 =====
+
+dfuntest is available in central Maven repository under following credentials:
+
+    groupId: me.gregorias
+    artifactId: dfuntest
+    version: 0.1
 
 dfuntest architecture is based on easily implementable interfaces, some of which
 are provided by dfuntest and others need to be implemented to fit into
@@ -41,6 +40,21 @@ To use dfuntest you need to first prepare your project:
   interface.
 * For each test scenario write a TestScript.
 * Run tests using available TestRunners or define your own.
+
+Building
+========
+
+dfuntest uses gradle with java plugin for typical java build operations.
+
+    ./gradlew build
+
+builds entire project, tests it and packages it.
+
+    ./gradlew uploadArchives
+
+publishes artifacts to maven repository. Note that this requires a valid PGP key
+and credentials to `oss.sonatype.org`. Before uploading set proper version
+number in `build.gradle`.
 
 History
 =======
