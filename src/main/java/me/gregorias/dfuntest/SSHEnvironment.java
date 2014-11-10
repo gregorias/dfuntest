@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import me.gregorias.dfuntest.util.SSHClientFactory;
 import net.schmizz.sshj.sftp.SFTPClient;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +36,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
   private final InetAddress mRemoteInetAddress;
   private final Executor mExecutor;
+  private final SSHClientFactory mSSHClientFactory;
 
   private final String mCDCommand;
 
@@ -46,13 +48,15 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
    * @param remoteHomePath Path to remote home where environment will be placed.
    *                       May be relative to user's home.
    * @param executor Executor for running remote commands
+   * @param sshClientFactory Factory for SSHClients
    */
   public SSHEnvironment(int id,
       String username,
       Path privateKeyPath,
       InetAddress remoteInetAddress,
       String remoteHomePath,
-      Executor executor) {
+      Executor executor,
+      SSHClientFactory sshClientFactory) {
     super();
     mId = id;
     mRemoteHomePath = remoteHomePath;
@@ -62,6 +66,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
     mRemoteInetAddress = remoteInetAddress;
     mExecutor = executor;
+    mSSHClientFactory = sshClientFactory;
 
     mCDCommand = "cd " + remoteHomePath + "; ";
   }
@@ -295,7 +300,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   }
 
   private SSHClient connectWithSSH() throws IOException {
-    SSHClient ssh = new SSHClient();
+    SSHClient ssh = mSSHClientFactory.newSSHClient();
     ssh.loadKnownHosts();
     ssh.connect(mRemoteInetAddress);
     KeyProvider keys = ssh.loadKeys(mPrivateKeyPath.toString());

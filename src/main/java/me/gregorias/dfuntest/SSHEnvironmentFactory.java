@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import me.gregorias.dfuntest.util.SSHClientFactory;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,8 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
           privateKeyPath,
           InetAddress.getByName(hosts.get(envIdx).toString()),
           remoteDir,
-          mExecutor);
+          mExecutor,
+          SSHClientFactory.getSSHClientFactory());
       environments.add(env);
     }
     return environments;
