@@ -37,17 +37,12 @@ public abstract class App {
 
   /**
    * Starts the application and allows it to run in background.
-   *
-   * @throws CommandException
-   * @throws IOException
    */
   public abstract void startUp() throws CommandException, IOException;
 
   /**
    * Shuts down started application and deallocates all resources associated
    * with running application.
-   *
-   * @throws IOException
    */
   public abstract void shutDown() throws IOException;
 }

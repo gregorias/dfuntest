@@ -10,8 +10,6 @@ import java.io.OutputStream;
 public interface RemoteProcess {
   /**
    * Forcibly terminates the process.
-   *
-   * @throws IOException
    */
   void destroy() throws IOException;
 
@@ -25,8 +23,6 @@ public interface RemoteProcess {
    * Blocks till process finishes and returns its exit code.
    *
    * @return exit value of process
-   * @throws InterruptedException
-   * @throws IOException
    */
   int waitFor() throws InterruptedException, IOException;
 }

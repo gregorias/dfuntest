@@ -38,6 +38,15 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
   private final String mCDCommand;
 
+  /**
+   * @param id Environment's id
+   * @param username Username of remote account
+   * @param privateKeyPath Path to private key file
+   * @param remoteInetAddress Remote host's address
+   * @param remoteHomePath Path to remote home where environment will be placed.
+   *                       May be relative to user's home.
+   * @param executor Executor for running remote commands
+   */
   public SSHEnvironment(int id,
       String username,
       Path privateKeyPath,
@@ -115,7 +124,6 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
    * directories all required parent directories are created as well.
    *
    * @param directoryPath path to create
-   * @throws IOException
    */
   public void mkdirs(String directoryPath) throws IOException {
     LOGGER.trace("mkdirs({})", directoryPath);

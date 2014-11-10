@@ -1,5 +1,6 @@
 package me.gregorias.dfuntest;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
@@ -10,7 +11,7 @@ import java.util.concurrent.ExecutionException;
  * @author Grzegorz Milka
  */
 public interface EnvironmentPreparator {
-  void prepareEnvironments(Collection<Environment> envs) throws ExecutionException;
+  void prepareEnvironments(Collection<Environment> envs) throws IOException;
 
   /**
    * Performs best-effort try to collect output and log files for report.
@@ -22,7 +23,7 @@ public interface EnvironmentPreparator {
   /**
    * Performs best-effort try to clean prepared environments.
    *
-   * @param envs
+   * @param envs prepraredEnvironments
    */
   void cleanEnvironments(Collection<Environment> envs);
 }

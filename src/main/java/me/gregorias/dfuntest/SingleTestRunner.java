@@ -56,7 +56,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
       mLogger.info("run(): Preparing environments.");
       mEnvironmentPreparator.prepareEnvironments(envs);
       mLogger.info("run(): Environments prepared: ", envs.size());
-    } catch (ExecutionException e) {
+    } catch (IOException e) {
       mLogger.error("run(): Could not prepare environments.", e);
       mEnvironmentFactory.destroyEnvironments(envs);
       return new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");

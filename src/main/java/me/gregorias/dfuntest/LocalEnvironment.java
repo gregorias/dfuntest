@@ -9,10 +9,17 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+/**
+ * Environment on local host with specified home path
+ */
 public class LocalEnvironment extends AbstractConfigurationEnvironment {
   private final int mId;
   private final Path mDir;
 
+  /**
+   * @param id Environment's id
+   * @param dir Environment's home directory
+   */
   public LocalEnvironment(int id, Path dir) {
     super();
     mId = id;

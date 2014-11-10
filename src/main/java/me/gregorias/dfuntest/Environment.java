@@ -15,6 +15,8 @@ import java.util.NoSuchElementException;
 public interface Environment {
 
   /**
+   * Copies specified file or directory to destination directory on environment.
+   *
    * @param srcPath Local source path.
    * @param destRelPath Relative destination directory on this environment.
    * @throws IOException
@@ -22,6 +24,8 @@ public interface Environment {
   void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException;
 
   /**
+   * Copies specified file or directory to destination directory on local host.
+   *
    * @param srcRelPath Relative source path on this environment.
    * @param destPath Local destination directory.
    * @throws IOException
@@ -34,10 +38,13 @@ public interface Environment {
   String getHostname();
 
   /**
-   * @return Numeric identifier of this environment.
+   * @return Numeric identifier of this environment
    */
   int getId();
 
+  /**
+   * @return Human readable name for this environment
+   */
   String getName();
 
   Object getProperty(String key) throws NoSuchElementException;
@@ -45,10 +52,10 @@ public interface Environment {
   /**
    * Synchronously runs arbitrary command on this environment's OS.
    *
-   * @param command
+   * @param command Command to run
    * @return Finished process.
-   * @throws CommandException
    * @throws InterruptedException
+   * @throws IOException
    */
   RemoteProcess runCommand(List<String> command) throws InterruptedException, IOException;
 
@@ -65,8 +72,8 @@ public interface Environment {
   /**
    * Set arbitrary property of this environment.
    *
-   * @param key
-   * @param value
+   * @param key property's key
+   * @param value property's value
    */
   void setProperty(String key, Object value);
 }
