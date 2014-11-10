@@ -13,9 +13,14 @@ import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class LocalEnvironmentTest {
+  @Rule
+  public TemporaryFolder mTempFolder = new TemporaryFolder();
+
   private static final String PREFIX = "NEBTMP";
   private Path mEnvDir;
   private Path mLocalDir;
@@ -24,16 +29,10 @@ public class LocalEnvironmentTest {
 
   @Before
   public void setUp() throws IOException {
-    mEnvDir = Files.createTempDirectory(null);
-    mLocalDir = Files.createTempDirectory(null);
+    mEnvDir = mTempFolder.newFolder().toPath();
+    mLocalDir = mTempFolder.newFolder().toPath();
 
     mLocalEnvironment = new LocalEnvironment(0, mEnvDir, FileUtilsImpl.getFileUtilsImpl());
-  }
-
-  @After
-  public void tearDown() {
-    FileUtils.deleteQuietly(mLocalDir.toFile());
-    FileUtils.deleteQuietly(mEnvDir.toFile());
   }
 
   @Test
