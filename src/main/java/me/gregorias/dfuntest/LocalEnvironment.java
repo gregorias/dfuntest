@@ -1,13 +1,12 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.util.FileUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * Environment on local host with specified home path
@@ -15,46 +14,48 @@ import org.apache.commons.io.FileUtils;
 public class LocalEnvironment extends AbstractConfigurationEnvironment {
   private final int mId;
   private final Path mDir;
+  private final FileUtils mFileUtils;
 
   /**
    * @param id Environment's id
    * @param dir Environment's home directory
+   * @param fileUtils file utilities to use
    */
-  public LocalEnvironment(int id, Path dir) {
+  public LocalEnvironment(int id, Path dir, FileUtils fileUtils) {
     super();
     mId = id;
     mDir = dir;
+    mFileUtils = fileUtils;
   }
 
   @Override
   public void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException {
     Path destPath = mDir.resolve(destRelPath);
-    if (!Files.exists(destPath)) {
-      Files.createDirectories(destPath);
-    } else if (!Files.isDirectory(destPath)) {
-      throw new IOException(
-          "Destination path exists and it is not a directory.");
+    if (!mFileUtils.exists(destPath)) {
+      mFileUtils.createDirectories(destPath);
+    } else if (!mFileUtils.isDirectory(destPath)) {
+      throw new IOException("Destination path exists and it is not a directory.");
     }
-    if (Files.isDirectory(srcPath)) {
-      FileUtils.copyDirectoryToDirectory(srcPath.toFile(), destPath.toFile());
+    if (mFileUtils.isDirectory(srcPath)) {
+      mFileUtils.copyDirectoryToDirectory(srcPath.toFile(), destPath.toFile());
     } else {
-      FileUtils.copyFileToDirectory(srcPath.toFile(), destPath.toFile());
+      mFileUtils.copyFileToDirectory(srcPath.toFile(), destPath.toFile());
     }
   }
 
   @Override
   public void copyFilesToLocalDisk(String srcRelPath, Path destPath) throws IOException {
     Path srcPath = mDir.resolve(srcRelPath);
-    if (!Files.exists(destPath)) {
-      Files.createDirectories(destPath);
-    } else if (!Files.isDirectory(destPath)) {
+    if (!mFileUtils.exists(destPath)) {
+      mFileUtils.createDirectories(destPath);
+    } else if (!mFileUtils.isDirectory(destPath)) {
       throw new IOException(
           "Destination path exists and it is not a directory.");
     }
-    if (Files.isDirectory(srcPath)) {
-      FileUtils.copyDirectoryToDirectory(srcPath.toFile(), destPath.toFile());
+    if (mFileUtils.isDirectory(srcPath)) {
+      mFileUtils.copyDirectoryToDirectory(srcPath.toFile(), destPath.toFile());
     } else {
-      FileUtils.copyFileToDirectory(srcPath.toFile(), destPath.toFile());
+      mFileUtils.copyFileToDirectory(srcPath.toFile(), destPath.toFile());
     }
   }
 
@@ -82,17 +83,13 @@ public class LocalEnvironment extends AbstractConfigurationEnvironment {
 
   @Override
   public RemoteProcess runCommandAsynchronously(List<String> command) throws IOException {
-    ProcessBuilder pb = new ProcessBuilder();
-    pb.command(command);
-    pb.directory(mDir.toFile());
-    Process process;
-    process = pb.start();
+    Process process = mFileUtils.runCommand(command, mDir.toFile());
     return new ProcessAdapter(process);
   }
 
   @Override
   public void removeFile(String relPath) {
-    FileUtils.deleteQuietly(mDir.resolve(relPath).toFile());
+    mFileUtils.deleteQuietly(mDir.resolve(relPath).toFile());
   }
 
   private static class ProcessAdapter implements RemoteProcess {

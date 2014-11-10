@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
+import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +27,7 @@ public class LocalEnvironmentTest {
     mEnvDir = Files.createTempDirectory(null);
     mLocalDir = Files.createTempDirectory(null);
 
-    mLocalEnvironment = new LocalEnvironment(0, mEnvDir);
+    mLocalEnvironment = new LocalEnvironment(0, mEnvDir, FileUtilsImpl.getFileUtilsImpl());
   }
 
   @After

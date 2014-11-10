@@ -8,6 +8,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
+apply plugin: 'jacoco'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
@@ -41,6 +42,17 @@ compileJava {
 compileTestJava {
   sourceCompatibility = '1.7'
   targetCompatibility = '1.7'
+}
+
+jacoco {
+  toolVersion = '0.7.2.201409121644'
+}
+
+jacocoTestReport {
+  dependsOn test
+  reports {
+    html.enabled true
+  }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

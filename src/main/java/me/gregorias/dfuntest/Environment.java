@@ -47,6 +47,13 @@ public interface Environment {
    */
   String getName();
 
+  /**
+   * Gets saved property.
+   *
+   * @param key property's key
+   * @return value corresponding to given key
+   * @throws NoSuchElementException thrown when given key is not present
+   */
   Object getProperty(String key) throws NoSuchElementException;
 
   /**

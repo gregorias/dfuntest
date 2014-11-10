@@ -2,6 +2,7 @@ package me.gregorias.dfuntest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Environment which implements configuration settings.
@@ -16,8 +17,12 @@ public abstract class AbstractConfigurationEnvironment implements Environment {
   }
 
   @Override
-  public Object getProperty(String key) {
-    return mConfig.get(key);
+  public Object getProperty(String key) throws NoSuchElementException {
+    if (mConfig.containsKey(key)) {
+      return mConfig.get(key);
+    } else {
+      throw new NoSuchElementException("Key: " + key + " is not present.");
+    }
   }
 
 

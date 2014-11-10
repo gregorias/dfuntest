@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -52,7 +53,8 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
     for (int envIdx = 0; envIdx < count; ++envIdx) {
       Path tempDirPath;
       tempDirPath = Files.createTempDirectory(dirPrefix);
-      LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath);
+      LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath,
+        FileUtilsImpl.getFileUtilsImpl());
       env.setProperty(ENV_CONFIG_ROOT_DIR, tempDirPath);
       environments.add(env);
     }

@@ -54,7 +54,6 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
     }
 
     String username = mConfig.getString(XML_ENV_USERNAME_FIELD);
-    // TODO username field check
     String privateKeyString = mConfig.getString(XML_ENV_PRIVATE_KEY_FIELD);
     Path privateKeyPath = FileSystems.getDefault().getPath(privateKeyString);
     String remoteDir = mConfig.getString(XML_ENV_DIR_FIELD, DEFAULT_REMOTE_DIR);
