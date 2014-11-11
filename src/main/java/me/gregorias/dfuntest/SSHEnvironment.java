@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
-import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.xfer.FileSystemFile;
 
 /**
@@ -270,7 +269,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
         try {
           mSSHSession.close();
         } catch (IOException e) {
-          LOGGER.warn("run(): Could not SSHSession.", e);
+          LOGGER.warn("run(): Could not close SSHSession.", e);
         }
 
         try {
@@ -278,7 +277,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
             mSSHClient.disconnect();
           }
         } catch (IOException e) {
-          LOGGER.warn("run(): Could not SSHClient.", e);
+          LOGGER.warn("run(): Could not disconnect SSHClient.", e);
         }
       }
     }
@@ -303,8 +302,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     SSHClient ssh = mSSHClientFactory.newSSHClient();
     ssh.loadKnownHosts();
     ssh.connect(mRemoteInetAddress);
-    KeyProvider keys = ssh.loadKeys(mPrivateKeyPath.toString());
-    ssh.authPublickey(mUsername, keys);
+    ssh.authPublickey(mUsername, mPrivateKeyPath.toString());
     return ssh;
   }
 
