@@ -19,7 +19,7 @@ if (!hasProperty('ossrhUsername')) {
 }
 
 group = 'me.gregorias'
-version = '0.1.1'
+version = '0.2-SNAPSHOT'
 
 repositories {
   mavenCentral()
@@ -168,9 +168,10 @@ def getPassword = { target ->
     }
   } else {
     pass = System.console().readPassword(prompt)
-    pass = new String(pass)
   }
-  pass
+  // This is necessary, because SWT for example does not return real String and
+  // may be invalidated.
+  pass = new String(pass)
 }
 
 gradle.taskGraph.beforeTask { taskGraph ->
