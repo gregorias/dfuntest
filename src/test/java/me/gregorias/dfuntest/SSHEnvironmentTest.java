@@ -277,4 +277,19 @@ public class SSHEnvironmentTest {
     command.add("hello");
     mSSHEnv.runCommand(command);
   }
+
+  @Test(expected = ConnectionException.class)
+  public void runCommandAsynchronouslyShouldThrowOriginalExceptionOnFail()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
+    doThrow(new IOException()).when(mMockSSHClient).disconnect();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    mSSHEnv.runCommandAsynchronously(command);
+  }
+
+  //TODO runCommandAsync tests
 }
