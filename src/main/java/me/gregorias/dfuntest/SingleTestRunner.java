@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basic implementation of TestRunner which runs one test script on given
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
  * @param <TestedAppT>
  */
 public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
-  private final Logger mLogger;
+  private static final Logger LOGGER = LoggerFactory.getLogger(SingleTestRunner.class);
   private final TestScript<TestedAppT> mScript;
 
   private final EnvironmentFactory mEnvironmentFactory;
@@ -26,13 +27,10 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
   private final ApplicationFactory<TestedAppT> mApplicationFactory;
 
   public SingleTestRunner(TestScript<TestedAppT> script,
-      Logger logger,
       EnvironmentFactory environmentFactory,
       EnvironmentPreparator environmentPreparator,
       ApplicationFactory<TestedAppT> applicationFactory) {
     mScript = script;
-
-    mLogger = logger;
 
     mEnvironmentFactory = environmentFactory;
 
@@ -43,21 +41,21 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
 
   @Override
   public TestResult run() {
-    mLogger.info("run(): Starting preparation for test script {}.", mScript.toString());
-    mLogger.info("run(): Creating environments.");
+    LOGGER.info("run(): Starting preparation for test script {}.", mScript.toString());
+    LOGGER.info("run(): Creating environments.");
     Collection<Environment> envs;
     try {
       envs = mEnvironmentFactory.createEnvironments();
     } catch (IOException e) {
-      mLogger.error("run(): Could not create environments.", e);
+      LOGGER.error("run(): Could not create environments.", e);
       return new TestResult(TestResult.Type.FAILURE, "Could not create environments.");
     }
     try {
-      mLogger.info("run(): Preparing environments.");
+      LOGGER.info("run(): Preparing environments.");
       mEnvironmentPreparator.prepareEnvironments(envs);
-      mLogger.info("run(): Environments prepared: ", envs.size());
+      LOGGER.info("run(): Environments prepared: ", envs.size());
     } catch (IOException e) {
-      mLogger.error("run(): Could not prepare environments.", e);
+      LOGGER.error("run(): Could not prepare environments.", e);
       mEnvironmentFactory.destroyEnvironments(envs);
       return new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
     }
@@ -69,7 +67,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
 
     TestResult result = mScript.run(apps);
 
-    mLogger.info("run(): Collecting output and log files.");
+    LOGGER.info("run(): Collecting output and log files.");
     mEnvironmentPreparator.collectOutputAndLogFiles(envs);
     mEnvironmentPreparator.cleanEnvironments(envs);
     mEnvironmentFactory.destroyEnvironments(envs);
