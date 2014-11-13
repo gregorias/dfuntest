@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.SSHClientFactory;
 import net.schmizz.sshj.sftp.SFTPClient;
 import org.apache.commons.io.FilenameUtils;
@@ -25,6 +26,8 @@ import net.schmizz.sshj.xfer.FileSystemFile;
 /**
  * An UNIX environment accessible through SSH with public key.
  */
+// TODO separate path concatenation in SSHEnv to different method
+// TODO Process destroy should work correctly
 public class SSHEnvironment extends AbstractConfigurationEnvironment {
   private static final Logger LOGGER = LoggerFactory.getLogger(SSHEnvironment.class);
   private final int mId;
@@ -36,6 +39,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   private final InetAddress mRemoteInetAddress;
   private final Executor mExecutor;
   private final SSHClientFactory mSSHClientFactory;
+  private final FileUtils mFileUtils;
 
   private final String mCDCommand;
 
@@ -48,6 +52,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
    *                       May be relative to user's home.
    * @param executor Executor for running remote commands
    * @param sshClientFactory Factory for SSHClients
+   * @param fileUtils Local file utils
    */
   public SSHEnvironment(int id,
       String username,
@@ -55,7 +60,8 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
       InetAddress remoteInetAddress,
       String remoteHomePath,
       Executor executor,
-      SSHClientFactory sshClientFactory) {
+      SSHClientFactory sshClientFactory,
+      FileUtils fileUtils) {
     super();
     mId = id;
     mRemoteHomePath = remoteHomePath;
@@ -66,6 +72,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     mRemoteInetAddress = remoteInetAddress;
     mExecutor = executor;
     mSSHClientFactory = sshClientFactory;
+    mFileUtils = fileUtils;
 
     mCDCommand = "cd " + remoteHomePath + "; ";
   }
@@ -74,14 +81,13 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   public void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException {
     LOGGER.trace("copyFilesFromLocalDisk({}, {})", srcPath.toString(), destRelPath);
     mkdirs(destRelPath);
+
+    // Must be correct, because mkdirs has passed.
+    String remotePath = FilenameUtils.concat(mRemoteHomePath, destRelPath);
+
     SSHClient ssh = connectWithSSH();
     try {
       ssh.useCompression();
-
-      String remotePath = FilenameUtils.concat(mRemoteHomePath, destRelPath);
-      if (remotePath == null) {
-        throw new IllegalArgumentException("Given paths cannot be correctly concatenated.");
-      }
 
       ssh.newSCPFileTransfer().upload(new FileSystemFile(srcPath.toFile()), remotePath);
     } finally {
@@ -93,6 +99,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   public void copyFilesToLocalDisk(String srcRelPath, Path destPath) throws IOException {
     LOGGER.trace("copyFilesToLocalDisk({}, {})", srcRelPath, destPath.toString());
     createDestinationDirectoriesLocally(destPath);
+
     SSHClient ssh = connectWithSSH();
     try {
       ssh.useCompression();
@@ -133,8 +140,8 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     LOGGER.trace("mkdirs({})", directoryPath);
     String finalDirectoryPath = FilenameUtils.concat(mRemoteHomePath, directoryPath);
     if (finalDirectoryPath == null) {
-      throw new IOException("Provided directory path is invalid and could not be concatenated"
-        + " with base path.");
+      throw new IllegalArgumentException("Provided directory path is invalid and could not be"
+        + " concatenated with base path.");
     }
     FilenameUtils.normalize(finalDirectoryPath, true);
     if (!finalDirectoryPath.startsWith("/")) {
@@ -306,11 +313,8 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     return ssh;
   }
 
-  private static void createDestinationDirectoriesLocally(Path destPath) throws IOException {
-    boolean hasCreated = destPath.toFile().mkdirs();
-    if (!hasCreated && !destPath.toFile().isDirectory()) {
-      throw new IOException("Could not create required directories.");
-    }
+  private void createDestinationDirectoriesLocally(Path destPath) throws IOException {
+    mFileUtils.createDirectories(destPath);
   }
 
   private int runCommand(List<String> command, SSHClient ssh) throws IOException {
@@ -324,7 +328,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   }
 
   private ProcessAdapter runCommandAndWrapInProcessAdapter(List<String> command, SSHClient ssh)
-    throws IOException {
+      throws IOException {
     Session session = ssh.startSession();
     try {
       Command cmd = session.exec(mCDCommand + StringUtils.join(command, ' '));

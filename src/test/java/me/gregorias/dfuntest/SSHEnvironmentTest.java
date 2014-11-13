@@ -1,11 +1,15 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.SSHClientFactory;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.xfer.LocalDestFile;
+import net.schmizz.sshj.xfer.LocalSourceFile;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
@@ -38,19 +43,96 @@ public class SSHEnvironmentTest {
 
   private SSHClient mMockSSHClient = null;
   private SSHEnvironment mSSHEnv = null;
+  private FileUtils mMockFileUtils = null;
 
   @Before
   public void setUp() {
     SSHClientFactory mockSSHClientFactory = mock(SSHClientFactory.class);
     mMockSSHClient = mock(SSHClient.class);
+    mMockFileUtils = mock(FileUtils.class);
     mSSHEnv = new SSHEnvironment(ID,
         USERNAME,
         PRIVATE_KEY_PATH,
         REMOTE_ADDRESS,
         REMOTE_HOME_PATH,
         EXECUTOR,
-        mockSSHClientFactory);
+        mockSSHClientFactory,
+        mMockFileUtils);
     when(mockSSHClientFactory.newSSHClient()).thenReturn(mMockSSHClient);
+  }
+
+  @Test
+  public void copyFilesFromLocalDiskShouldRunSCPAndToCorrectDirectory() throws IOException {
+    SCPFileTransfer mockSCPFileTransfer = mock(SCPFileTransfer.class);
+    when(mMockSSHClient.newSCPFileTransfer()).thenReturn(mockSCPFileTransfer);
+    SFTPClient mockSFTP = mock(SFTPClient.class);
+    when(mMockSSHClient.newSFTPClient()).thenReturn(mockSFTP);
+
+    Path from = FileSystems.getDefault().getPath(".");
+    String to = "foo";
+
+    mSSHEnv.copyFilesFromLocalDisk(from, to);
+
+    verify(mMockSSHClient).newSCPFileTransfer();
+    String expectedDestination = FilenameUtils.concat(REMOTE_HOME_PATH, to);
+    verify(mockSCPFileTransfer).upload(any(LocalSourceFile.class), eq(expectedDestination));
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesShouldThrowExceptionWhenSCPFails() throws IOException {
+    SCPFileTransfer mockSCPFileTransfer = mock(SCPFileTransfer.class);
+    when(mMockSSHClient.newSCPFileTransfer()).thenReturn(mockSCPFileTransfer);
+    SFTPClient mockSFTP = mock(SFTPClient.class);
+    when(mMockSSHClient.newSFTPClient()).thenReturn(mockSFTP);
+    doThrow(new IOException()).when(mockSCPFileTransfer).upload(
+        any(LocalSourceFile.class), anyString());
+
+    Path from = FileSystems.getDefault().getPath(".");
+    String to = "foo";
+
+    mSSHEnv.copyFilesFromLocalDisk(from, to);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void copyFilesShouldThrowExceptionWhenDestinationIsIncorrect() throws IOException {
+    SCPFileTransfer mockSCPFileTransfer = mock(SCPFileTransfer.class);
+    when(mMockSSHClient.newSCPFileTransfer()).thenReturn(mockSCPFileTransfer);
+    SFTPClient mockSFTP = mock(SFTPClient.class);
+    when(mMockSSHClient.newSFTPClient()).thenReturn(mockSFTP);
+
+    Path from = FileSystems.getDefault().getPath(".");
+    String to = "../../..";
+
+    mSSHEnv.copyFilesFromLocalDisk(from, to);
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesToLocalDiskShouldThrowExceptionWhenCanNotCreateDirectories()
+      throws IOException {
+    SCPFileTransfer mockSCPFileTransfer = mock(SCPFileTransfer.class);
+    when(mMockSSHClient.newSCPFileTransfer()).thenReturn(mockSCPFileTransfer);
+
+    doThrow(IOException.class).when(mMockFileUtils).createDirectories(any(Path.class));
+
+    String from = ".";
+    Path to = FileSystems.getDefault().getPath(".");
+
+    mSSHEnv.copyFilesToLocalDisk(from, to);
+  }
+
+  @Test
+  public void copyFilesToLocalDiskShouldRunSCPAndToCorrectDirectory() throws IOException {
+    SCPFileTransfer mockSCPFileTransfer = mock(SCPFileTransfer.class);
+    when(mMockSSHClient.newSCPFileTransfer()).thenReturn(mockSCPFileTransfer);
+
+    String from = "foo";
+    Path to = FileSystems.getDefault().getPath(".");
+
+    mSSHEnv.copyFilesToLocalDisk(from, to);
+
+    verify(mMockSSHClient).newSCPFileTransfer();
+    String expectedDestination = FilenameUtils.concat(REMOTE_HOME_PATH, from);
+    verify(mockSCPFileTransfer).download(eq(expectedDestination), any(LocalDestFile.class));
   }
 
   @Test
@@ -104,9 +186,22 @@ public class SSHEnvironmentTest {
     mSSHEnv.mkdirs("mock");
   }
 
-  @Test(expected = IOException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void mkdirsShouldThrowExceptionOnIncorrectDestinationPath() throws IOException {
     mSSHEnv.mkdirs("../../../mock");
+  }
+
+  @Test
+  public void removeFileShouldCallProperCommand() throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+
+    String file = "foo";
+    mSSHEnv.removeFile(file);
+    verify(mockSession).exec(contains("rm -rf"));
+    verify(mockSession).exec(contains(file));
   }
 
   @Test
@@ -126,7 +221,7 @@ public class SSHEnvironmentTest {
 
   @Test
   public void runCommandShouldRunCommandWithProperArgumentsAndWaitForIt()
-    throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     Command mockCommand = mock(Command.class);
@@ -144,7 +239,7 @@ public class SSHEnvironmentTest {
 
   @Test(expected = IOException.class)
   public void runCommandShouldThrowExceptionIfCommandFails()
-    throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     Command mockCommand = mock(Command.class);
@@ -158,7 +253,7 @@ public class SSHEnvironmentTest {
 
   @Test
   public void runCommandShouldEndSuccessfullyOnSSHDisconectFailure()
-    throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     Command mockCommand = mock(Command.class);
@@ -172,7 +267,7 @@ public class SSHEnvironmentTest {
 
   @Test(expected = ConnectionException.class)
   public void runCommandShouldThrowOriginalExceptionOnFail()
-    throws IOException, InterruptedException {
+      throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
