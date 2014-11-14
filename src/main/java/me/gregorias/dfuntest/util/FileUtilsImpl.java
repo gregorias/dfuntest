@@ -28,6 +28,11 @@ public class FileUtilsImpl implements FileUtils {
   }
 
   @Override
+  public Path createTempDirectory(String dirPrefix) throws IOException {
+    return Files.createTempDirectory(dirPrefix);
+  }
+
+  @Override
   public boolean deleteQuietly(File file) {
     return org.apache.commons.io.FileUtils.deleteQuietly(file);
   }

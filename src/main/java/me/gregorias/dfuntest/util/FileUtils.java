@@ -35,6 +35,15 @@ public interface FileUtils {
   void createDirectories(Path path) throws IOException;
 
   /**
+   * {@link java.nio.file.Files#createTempDirectory(
+   * String, java.nio.file.attribute.FileAttribute[])}
+   *
+   * @param dirPrefix prefix of temporary directory
+   * @return Path to created directory
+   */
+  Path createTempDirectory(String dirPrefix) throws IOException;
+
+  /**
    * {@link org.apache.commons.io.FileUtils#deleteQuietly(java.io.File)}
    *
    * @param file File to delete

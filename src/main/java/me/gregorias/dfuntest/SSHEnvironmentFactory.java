@@ -83,6 +83,5 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
   @Override
   public void destroyEnvironments(Collection<Environment> envs) {
     LOGGER.info("destroyEnvironments()");
-    // TODO
   }
 }

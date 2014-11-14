@@ -2,7 +2,6 @@ package me.gregorias.dfuntest;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,24 +30,24 @@ public class SSHEnvironmentFactoryTest {
     }
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void createShouldThrowExceptionOnEmptyHostsField() throws IOException {
     Configuration config = new XMLConfiguration();
     config.setProperty(SSHEnvironmentFactory.XML_USERNAME_FIELD, "username");
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    Collection<Environment> envs = sshEnvironmentFactory.createEnvironments();
+    sshEnvironmentFactory.createEnvironments();
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void createShouldThrowExceptionOnEmptyUsernameField() throws IOException {
     Configuration config = new XMLConfiguration();
     config.setProperty(SSHEnvironmentFactory.XML_HOSTS_FIELD, "localhost, 127.0.0.1");
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    Collection<Environment> envs = sshEnvironmentFactory.createEnvironments();
+    sshEnvironmentFactory.createEnvironments();
   }
 
   @Test
