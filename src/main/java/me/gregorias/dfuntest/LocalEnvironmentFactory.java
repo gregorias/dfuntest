@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +34,15 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
   private static final String DEFAULT_DIR_PREFIX = "dfuntest";
 
   private final Configuration mConfig;
+  private final FileUtils mFileUtils;
+
+  public LocalEnvironmentFactory(Configuration config, FileUtils fileUtils) {
+    mConfig = config;
+    mFileUtils = fileUtils;
+  }
 
   public LocalEnvironmentFactory(Configuration config) {
-    mConfig = config;
+    this(config, FileUtilsImpl.getFileUtilsImpl());
   }
 
   @Override
@@ -53,8 +59,7 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
     for (int envIdx = 0; envIdx < count; ++envIdx) {
       Path tempDirPath;
       tempDirPath = Files.createTempDirectory(dirPrefix);
-      LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath,
-        FileUtilsImpl.getFileUtilsImpl());
+      LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath, mFileUtils);
       env.setProperty(ENV_CONFIG_ROOT_DIR, tempDirPath);
       environments.add(env);
     }
@@ -72,7 +77,7 @@ public class LocalEnvironmentFactory implements EnvironmentFactory {
         LOGGER.error("Could not destroy environment.", e);
         continue;
       }
-      FileUtils.deleteQuietly(dirPath.toFile());
+      mFileUtils.deleteQuietly(dirPath.toFile());
     }
   }
 }

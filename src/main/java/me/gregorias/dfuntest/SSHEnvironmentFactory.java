@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 import me.gregorias.dfuntest.util.SSHClientFactory;
 import org.apache.commons.configuration.Configuration;
@@ -32,11 +31,11 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Milka
  */
 public class SSHEnvironmentFactory implements EnvironmentFactory {
+  public static final String XML_HOSTS_FIELD = "hosts";
+  public static final String XML_USERNAME_FIELD = "username";
+  public static final String XML_PRIVATE_KEY_FIELD = "private-key";
+  public static final String XML_REMOTE_DIR_FIELD = "remote-dir";
   private static final Logger LOGGER = LoggerFactory.getLogger(SSHEnvironmentFactory.class);
-  private static final String XML_ENV_HOSTS_FIELD = "hosts";
-  private static final String XML_ENV_USERNAME_FIELD = "username";
-  private static final String XML_ENV_PRIVATE_KEY_FIELD = "private-key";
-  private static final String XML_ENV_DIR_FIELD = "remote-dir";
   private static final String DEFAULT_REMOTE_DIR = "";
 
   private final Configuration mConfig;
@@ -51,15 +50,18 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
   @Override
   public Collection<Environment> createEnvironments() throws IOException {
     LOGGER.info("createEnvironments()");
-    List<Object> hosts = mConfig.getList(XML_ENV_HOSTS_FIELD);
+    List<Object> hosts = mConfig.getList(XML_HOSTS_FIELD);
     if (null == hosts || hosts.isEmpty()) {
       throw new IllegalArgumentException("Hosts field does not exist or is empty.");
     }
 
-    String username = mConfig.getString(XML_ENV_USERNAME_FIELD);
-    String privateKeyString = mConfig.getString(XML_ENV_PRIVATE_KEY_FIELD);
+    String username = mConfig.getString(XML_USERNAME_FIELD);
+    String privateKeyString = mConfig.getString(XML_PRIVATE_KEY_FIELD);
+    String remoteDir = mConfig.getString(XML_REMOTE_DIR_FIELD, DEFAULT_REMOTE_DIR);
+    if (null == username || null == privateKeyString || null == remoteDir) {
+      throw new IllegalArgumentException("Some configuration fields are missing.");
+    }
     Path privateKeyPath = FileSystems.getDefault().getPath(privateKeyString);
-    String remoteDir = mConfig.getString(XML_ENV_DIR_FIELD, DEFAULT_REMOTE_DIR);
 
     Collection<Environment> environments = new LinkedList<>();
     for (int envIdx = 0; envIdx < hosts.size(); ++envIdx) {
@@ -81,5 +83,6 @@ public class SSHEnvironmentFactory implements EnvironmentFactory {
   @Override
   public void destroyEnvironments(Collection<Environment> envs) {
     LOGGER.info("destroyEnvironments()");
+    // TODO
   }
 }
