@@ -166,6 +166,7 @@ public class SSHEnvironmentTest {
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     mSSHEnv.mkdirs("mock");
     verify(mockSession).exec(contains("mkdir -p"));
+    verify(mockSession).exec(contains(FilenameUtils.concat(REMOTE_HOME_PATH, "mock")));
     verify(mockCommand).join();
   }
 

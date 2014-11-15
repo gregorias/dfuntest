@@ -41,8 +41,6 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
   private final SSHClientFactory mSSHClientFactory;
   private final FileUtils mFileUtils;
 
-  private final String mCDCommand;
-
   /**
    * @param id Environment's id
    * @param username Username of remote account
@@ -73,8 +71,6 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     mExecutor = executor;
     mSSHClientFactory = sshClientFactory;
     mFileUtils = fileUtils;
-
-    mCDCommand = "cd " + remoteHomePath + "; ";
   }
 
   @Override
@@ -154,8 +150,9 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
         List<String> command = new LinkedList<>();
         command.add("mkdir");
         command.add("-p");
-        command.add(directoryPath);
-        int exitStatus = runCommand(command, ssh);
+        command.add(finalDirectoryPath);
+        String sshHomeDir = ".";
+        int exitStatus = runCommand(command, ssh, sshHomeDir);
         if (exitStatus != 0) {
           throw new IOException("Could not create suggested directories.");
         }
@@ -326,9 +323,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     mFileUtils.createDirectories(destPath);
   }
 
-  private int runCommand(List<String> command, SSHClient ssh) throws IOException {
+  private int runCommand(List<String> command, SSHClient ssh, String pwdDir) throws IOException {
+    String cdCommand = "cd " + pwdDir + ";";
     try (Session session = ssh.startSession()) {
-      Command cmd = session.exec(mCDCommand + StringUtils.join(command, ' '));
+      Command cmd = session.exec(cdCommand + StringUtils.join(command, ' '));
       cmd.join();
       int exitStatus = cmd.getExitStatus();
       cmd.close();
@@ -338,9 +336,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
   private ProcessAdapter runCommandAndWrapInProcessAdapter(List<String> command, SSHClient ssh)
       throws IOException {
+    String cdCommand = "cd " + mRemoteHomePath + ";";
     Session session = ssh.startSession();
     try {
-      Command cmd = session.exec(mCDCommand + StringUtils.join(command, ' '));
+      Command cmd = session.exec(cdCommand + StringUtils.join(command, ' '));
       return new ProcessAdapter(ssh, session, cmd);
     } catch (IOException e) {
       session.close();
