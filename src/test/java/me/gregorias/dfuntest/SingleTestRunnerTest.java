@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -15,28 +17,33 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class SingleTestRunnerTest {
   private SingleTestRunner<Environment, App<Environment>> mSingleTestRunner = null;
 
-  private TestScript<App<Environment>> mMockTestScript = null;
-  private EnvironmentFactory<Environment> mMockEnvironmentFactory = null;
-  private EnvironmentPreparator<Environment> mMockEnvironmentPreparator = null;
+  private final TestScript<App<Environment>> mMockTestScript = mock(TestScript.class);
+  private final EnvironmentFactory<Environment> mMockEnvironmentFactory =
+      mock(EnvironmentFactory.class);
+  private final EnvironmentPreparator<Environment> mMockEnvironmentPreparator =
+      mock(EnvironmentPreparator.class);
+  private final ApplicationFactory<Environment, App<Environment>> mMockApplicationFactory =
+      mock(ApplicationFactory.class);
 
-  private ApplicationFactory<Environment, App<Environment>> mMockApplicationFactory = null;
+  private final Path mReportPath = FileSystems.getDefault().getPath("reportDir");
 
   @Before
   public void setUp() {
-    mMockTestScript = mock(TestScript.class);
-    mMockEnvironmentFactory = mock(EnvironmentFactory.class);
-    mMockEnvironmentPreparator = mock(EnvironmentPreparator.class);
-    mMockApplicationFactory = mock(ApplicationFactory.class);
-    mSingleTestRunner = new SingleTestRunner<Environment, App<Environment>>(mMockTestScript,
+    mSingleTestRunner = new SingleTestRunner<>(mMockTestScript,
         mMockEnvironmentFactory,
         mMockEnvironmentPreparator,
-        mMockApplicationFactory);
+        mMockApplicationFactory,
+        true,
+        true,
+        mReportPath);
   }
 
   @Test
@@ -55,10 +62,10 @@ public class SingleTestRunnerTest {
         mMockEnvironmentPreparator,
         mMockApplicationFactory);
     inOrder.verify(mMockEnvironmentFactory).createEnvironments();
-    inOrder.verify(mMockEnvironmentPreparator).prepareEnvironments(eq(envs));
+    inOrder.verify(mMockEnvironmentPreparator).prepare(eq(envs));
     inOrder.verify(mMockApplicationFactory).newApp(any(Environment.class));
     inOrder.verify(mMockTestScript).run(anyCollection());
-    inOrder.verify(mMockEnvironmentPreparator).cleanEnvironments(eq(envs));
+    inOrder.verify(mMockEnvironmentPreparator).clean(eq(envs));
     inOrder.verify(mMockEnvironmentFactory).destroyEnvironments(eq(envs));
     assertEquals(TestResult.Type.SUCCESS, result.getType());
   }
@@ -76,10 +83,38 @@ public class SingleTestRunnerTest {
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.createEnvironments()).thenReturn(envs);
-    doThrow(IOException.class).when(mMockEnvironmentPreparator).prepareEnvironments(
+    doThrow(IOException.class).when(mMockEnvironmentPreparator).prepare(
         anyCollection());
 
     TestResult result = mSingleTestRunner.run();
     assertEquals(TestResult.Type.FAILURE, result.getType());
+  }
+
+  @Test
+  public void runShouldOnlyCallRestoreIfSetInConstructor() throws IOException {
+    SingleTestRunner singleTestRunner = new SingleTestRunner<>(mMockTestScript,
+        mMockEnvironmentFactory,
+        mMockEnvironmentPreparator,
+        mMockApplicationFactory,
+        false,
+        false,
+        mReportPath);
+
+    Collection<Environment> envs = new LinkedList<>();
+    Environment mockEnv = mock(Environment.class);
+    envs.add(mockEnv);
+    when(mMockEnvironmentFactory.createEnvironments()).thenReturn(envs);
+    when(mMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+
+    TestResult result = singleTestRunner.run();
+
+    verify(mMockEnvironmentFactory).createEnvironments();
+    verify(mMockEnvironmentPreparator).restore(eq(envs));
+    verify(mMockEnvironmentPreparator, never()).prepare(anyCollection());
+    verify(mMockTestScript).run(anyCollection());
+    verify(mMockEnvironmentPreparator, never()).clean(anyCollection());
+    verify(mMockEnvironmentFactory, never()).destroyEnvironments(anyCollection());
+    assertEquals(TestResult.Type.SUCCESS, result.getType());
   }
 }

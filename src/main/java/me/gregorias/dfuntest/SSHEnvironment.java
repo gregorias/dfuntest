@@ -26,8 +26,6 @@ import net.schmizz.sshj.xfer.FileSystemFile;
 /**
  * An UNIX environment accessible through SSH with public key.
  */
-// TODO separate path concatenation in SSHEnv to different method
-// TODO Process destroy should work correctly
 public class SSHEnvironment extends AbstractConfigurationEnvironment {
   private static final Logger LOGGER = LoggerFactory.getLogger(SSHEnvironment.class);
   private final int mId;

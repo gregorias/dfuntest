@@ -1,6 +1,7 @@
 package me.gregorias.dfuntest;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -20,24 +21,27 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
     implements TestRunner {
   private static final Logger LOGGER = LoggerFactory.getLogger(SingleTestRunner.class);
   private final TestScript<AppT> mScript;
-
   private final EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
-
   private final EnvironmentPreparator<EnvironmentT> mEnvironmentPreparator;
-
   private final ApplicationFactory<EnvironmentT, AppT> mApplicationFactory;
+  private final boolean mShouldPrepareEnvironments;
+  private final boolean mShouldCleanEnvironments;
+  private final Path mReportPath;
 
   public SingleTestRunner(TestScript<AppT> script,
       EnvironmentFactory<EnvironmentT> environmentFactory,
       EnvironmentPreparator<EnvironmentT> environmentPreparator,
-      ApplicationFactory<EnvironmentT, AppT> applicationFactory) {
+      ApplicationFactory<EnvironmentT, AppT> applicationFactory,
+      boolean shouldPrepareEnvironments,
+      boolean shouldCleanEnvironments,
+      Path reportPath) {
     mScript = script;
-
     mEnvironmentFactory = environmentFactory;
-
     mEnvironmentPreparator = environmentPreparator;
-
     mApplicationFactory = applicationFactory;
+    mShouldPrepareEnvironments = shouldPrepareEnvironments;
+    mShouldCleanEnvironments = shouldCleanEnvironments;
+    mReportPath = reportPath;
   }
 
   @Override
@@ -52,8 +56,13 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
       return new TestResult(TestResult.Type.FAILURE, "Could not create environments.");
     }
     try {
-      LOGGER.info("run(): Preparing environments.");
-      mEnvironmentPreparator.prepareEnvironments(envs);
+      if (mShouldPrepareEnvironments) {
+        LOGGER.info("run(): Preparing environments.");
+        mEnvironmentPreparator.prepare(envs);
+      } else {
+        LOGGER.info("run(): Restoring environments.");
+        mEnvironmentPreparator.restore(envs);
+      }
       LOGGER.info("run(): Environments prepared: ", envs.size());
     } catch (IOException e) {
       LOGGER.error("run(): Could not prepare environments.", e);
@@ -69,9 +78,11 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
     TestResult result = mScript.run(apps);
 
     LOGGER.info("run(): Collecting output and log files.");
-    mEnvironmentPreparator.collectOutputAndLogFiles(envs);
-    mEnvironmentPreparator.cleanEnvironments(envs);
-    mEnvironmentFactory.destroyEnvironments(envs);
+    mEnvironmentPreparator.collectOutputAndLogFiles(envs, mReportPath);
+    if (mShouldCleanEnvironments) {
+      mEnvironmentPreparator.clean(envs);
+      mEnvironmentFactory.destroyEnvironments(envs);
+    }
 
     return result;
   }
