@@ -1,17 +1,23 @@
 package me.gregorias.dfuntest;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,19 +42,103 @@ public class LocalEnvironmentTest {
   }
 
   @Test
-  public void shouldCreateFileUsingTouchProcess() throws
-      CommandException,
-      InterruptedException,
+  public void copyFilesFromLocalDiskShouldCreateDestinationDirectoryIfItDoesNotExist()
+      throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path sourcePath = FileSystems.getDefault().getPath("sourcedir");
+    String destPath = "targetdir";
+    Path fullDestPath = mEnvDir.resolve(destPath);
+    localEnvironment.copyFilesFromLocalDisk(sourcePath, destPath);
+    verify(mockFileUtils).createDirectories(eq(fullDestPath));
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesFromLocalDiskShouldFailIfCreateDestinationDirectoriesFails()
+      throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path sourcePath = FileSystems.getDefault().getPath("sourcedir");
+    String destPath = "targetdir";
+    Path fullDestPath = mEnvDir.resolve(destPath);
+    doThrow(IOException.class).when(mockFileUtils).createDirectories(eq(fullDestPath));
+    localEnvironment.copyFilesFromLocalDisk(sourcePath, destPath);
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesFromLocalDiskShouldFailIfDestinationIsNotADirectory() throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path sourcePath = FileSystems.getDefault().getPath("sourcedir");
+    String destPath = "targetdir";
+    Path fullDestPath = mEnvDir.resolve(destPath);
+    when(mockFileUtils.exists(eq(fullDestPath))).thenReturn(true);
+    when(mockFileUtils.isDirectory(eq(fullDestPath))).thenReturn(false);
+    localEnvironment.copyFilesFromLocalDisk(sourcePath, destPath);
+  }
+
+  @Test
+  public void copyFilesToLocalDiskShouldCreateDestinationDirectoryIfItDoesNotExist()
+      throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path targetPath = FileSystems.getDefault().getPath("targetdir");
+    localEnvironment.copyFilesToLocalDisk("unittestdir", targetPath);
+    verify(mockFileUtils).createDirectories(targetPath);
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesToLocalDiskShouldFailIfCreateDestinationDirectoriesFails()
+      throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path targetPath = FileSystems.getDefault().getPath("targetdir");
+    doThrow(IOException.class).when(mockFileUtils).createDirectories(eq(targetPath));
+    localEnvironment.copyFilesToLocalDisk("unittestdir", targetPath);
+  }
+
+  @Test(expected = IOException.class)
+  public void copyFilesToLocalDiskShouldFailIfDestinationIsNotADirectory() throws IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    Path targetPath = FileSystems.getDefault().getPath("targetdir");
+    when(mockFileUtils.exists(eq(targetPath))).thenReturn(true);
+    when(mockFileUtils.isDirectory(eq(targetPath))).thenReturn(false);
+    localEnvironment.copyFilesToLocalDisk("unittestdir", targetPath);
+  }
+
+  @Test
+  public void getHostnameShouldReturnLocalhost() {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    assertEquals("localhost", localEnvironment.getHostname());
+  }
+
+  @Test
+  public void getNameShouldReturnHomePathString() {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+    assertEquals(mEnvDir.toAbsolutePath().toString(), localEnvironment.getName());
+  }
+
+  @Test
+  public void runCommandShouldRunProcess() throws CommandException, InterruptedException,
       IOException {
+    FileUtils mockFileUtils = mock(FileUtils.class);
+    Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
+
     List<String> commands = new LinkedList<>();
     commands.add("touch");
     commands.add(PREFIX);
 
-    RemoteProcess finishedProcess = mLocalEnvironment.runCommand(commands);
-    Path envFile = mEnvDir.resolve(PREFIX);
-    assertTrue(finishedProcess.waitFor() == 0);
-    assertTrue(Files.exists(envFile));
-    Files.deleteIfExists(envFile);
+    Process mockProcess = mock(Process.class);
+    int returnValue = 0;
+    when(mockProcess.exitValue()).thenReturn(returnValue);
+    when(mockFileUtils.runCommand(eq(commands), eq(mEnvDir.toFile()))).thenReturn(mockProcess);
+
+    RemoteProcess finishedProcess = localEnvironment.runCommand(commands);
+    verify(mockFileUtils).runCommand(eq(commands), eq(mEnvDir.toFile()));
+    assertEquals(returnValue, finishedProcess.waitFor());
   }
 
   @Test

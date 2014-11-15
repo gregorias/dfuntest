@@ -83,7 +83,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     mkdirs(destRelPath);
 
     // Must be correct, because mkdirs has passed.
-    String remotePath = FilenameUtils.concat(mRemoteHomePath, destRelPath);
+    String remotePath = concatenatePathToHome(destRelPath);
 
     SSHClient ssh = connectWithSSH();
     try {
@@ -104,10 +104,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     try {
       ssh.useCompression();
 
-      String remotePath = FilenameUtils.concat(mRemoteHomePath, srcRelPath);
-      if (remotePath == null) {
-        throw new IllegalArgumentException("Given paths cannot be correctly concatenated.");
-      }
+      String remotePath = concatenatePathToHome(srcRelPath);
 
       ssh.newSCPFileTransfer().download(remotePath, new FileSystemFile(destPath.toFile()));
     } finally {
@@ -138,11 +135,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
    */
   public void mkdirs(String directoryPath) throws IOException {
     LOGGER.trace("mkdirs({})", directoryPath);
-    String finalDirectoryPath = FilenameUtils.concat(mRemoteHomePath, directoryPath);
-    if (finalDirectoryPath == null) {
-      throw new IllegalArgumentException("Provided directory path is invalid and could not be"
-        + " concatenated with base path.");
-    }
+    String finalDirectoryPath = concatenatePathToHome(directoryPath);
     FilenameUtils.normalize(finalDirectoryPath, true);
     if (!finalDirectoryPath.startsWith("/")) {
       // SFTP mkdirs requires to a dot for relative path, otherwise it assumes given path is
@@ -225,9 +218,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
   private static class ProcessAdapter implements RemoteProcess, Runnable {
     private final SSHClient mSSHClient;
+    private boolean mHasSSHClientBeenClosed = false;
     private final Session mSSHSession;
     private final Command mCommand;
-    private final AtomicBoolean mHasJoined;
+    private final AtomicBoolean mHasJoined = new AtomicBoolean(false);
     private IOException mIOException;
     private int mExitCode;
 
@@ -235,13 +229,15 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
       mSSHClient = client;
       mCommand = command;
       mSSHSession = session;
-      mHasJoined = new AtomicBoolean(false);
     }
 
     @Override
     public void destroy() throws IOException {
       synchronized (mSSHClient) {
-        mSSHClient.close();
+        if (!mHasSSHClientBeenClosed) {
+          mSSHClient.disconnect();
+          mHasSSHClientBeenClosed = true;
+        }
       }
     }
 
@@ -261,7 +257,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
       try {
         mCommand.join();
         mExitCode = mCommand.getExitStatus();
@@ -270,8 +266,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
         LOGGER.error("run(): Could not correctly wait for command finish.", e);
         mIOException = e;
       } finally {
-        mHasJoined.set(true);
-        this.notifyAll();
+        synchronized (this) {
+          mHasJoined.set(true);
+          this.notifyAll();
+        }
 
         try {
           mSSHSession.close();
@@ -281,7 +279,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
         try {
           synchronized (mSSHClient) {
-            mSSHClient.disconnect();
+            if (!mHasSSHClientBeenClosed) {
+              mSSHClient.disconnect();
+              mHasSSHClientBeenClosed = true;
+            }
           }
         } catch (IOException e) {
           LOGGER.warn("run(): Could not disconnect SSHClient.", e);
@@ -295,14 +296,22 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
         while (!mHasJoined.get()) {
           this.wait();
         }
+      }
 
-        if (mIOException != null) {
-          throw mIOException;
-        } else {
-          return mExitCode;
-        }
+      if (mIOException != null) {
+        throw mIOException;
+      } else {
+        return mExitCode;
       }
     }
+  }
+
+  private String concatenatePathToHome(String relPath) {
+    String finalPath = FilenameUtils.concat(mRemoteHomePath, relPath);
+    if (finalPath == null) {
+      throw new IllegalArgumentException("Provided path can not be concatenated to home path.");
+    }
+    return finalPath;
   }
 
   private SSHClient connectWithSSH() throws IOException {

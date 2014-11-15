@@ -40,6 +40,11 @@ public class LocalEnvironmentFactoryTest {
     Collection<Environment> envs = factory.createEnvironments();
     verify(mockFileUtils, times(envCount)).createTempDirectory(eq(dirPrefix));
     assertEquals(envCount, envs.size());
+    int currentId = 0;
+    for (Environment env : envs) {
+      assertEquals(currentId, env.getId());
+      currentId += 1;
+    }
     factory.destroyEnvironments(envs);
   }
 

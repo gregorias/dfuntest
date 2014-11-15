@@ -14,6 +14,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import sun.org.mozilla.javascript.ast.Block;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,18 +24,25 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 public class SSHEnvironmentTest {
   private static final int ID = 0;
   private static final String USERNAME = "username";
@@ -204,6 +214,18 @@ public class SSHEnvironmentTest {
     verify(mockSession).exec(contains(file));
   }
 
+  @Test(expected = IOException.class)
+  public void removeFileShouldFailOnRMCommandFail() throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+    when(mockCommand.getExitStatus()).thenReturn(1);
+
+    String file = "foo";
+    mSSHEnv.removeFile(file);
+  }
+
   @Test
   public void runCommandShouldConnectProperly() throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
@@ -252,7 +274,7 @@ public class SSHEnvironmentTest {
   }
 
   @Test
-  public void runCommandShouldEndSuccessfullyOnSSHDisconectFailure()
+  public void runCommandShouldEndSuccessfullyOnSSHDisconnectFailure()
       throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
@@ -278,8 +300,116 @@ public class SSHEnvironmentTest {
     mSSHEnv.runCommand(command);
   }
 
+  @Test
+  public void runCommandAsynchronouslyShouldRunCommandWithProperArgumentsAndWaitForIt()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    BlockingQueue clientDisconnectQueue = new LinkedBlockingQueue();
+    doAnswer(new BlockingWaitAnswer(clientDisconnectQueue)).when(mMockSSHClient).disconnect();
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+    BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
+    doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
+    verify(mockSession).exec(contains(StringUtils.join(command, " ")));
+    verify(mockCommand, never()).close();
+    verify(mockSession, never()).close();
+    verify(mMockSSHClient, never()).disconnect();
+    joinAnswers.add(0);
+    int defaultReturnValue = 0;
+    int returnValue = process.waitFor();
+    assertEquals(defaultReturnValue, returnValue);
+    clientDisconnectQueue.take();
+    verify(mockCommand).close();
+    verify(mockSession).close();
+    verify(mMockSSHClient).disconnect();
+  }
+
+  @Test
+  public void runCommandAsynchronouslyShouldStillWorkOnSessionCloseFailure()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    BlockingQueue clientDisconnectQueue = new LinkedBlockingQueue();
+    doAnswer(new BlockingWaitAnswer(clientDisconnectQueue)).when(mMockSSHClient).disconnect();
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+    doThrow(ConnectionException.class).when(mockSession).close();
+    BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
+    doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
+    verify(mockSession).exec(contains(StringUtils.join(command, " ")));
+    verify(mockCommand, never()).close();
+    verify(mockSession, never()).close();
+    verify(mMockSSHClient, never()).disconnect();
+    joinAnswers.add(0);
+    int defaultReturnValue = 0;
+    int returnValue = process.waitFor();
+    assertEquals(defaultReturnValue, returnValue);
+    clientDisconnectQueue.take();
+    verify(mockCommand).close();
+    verify(mockSession).close();
+    verify(mMockSSHClient).disconnect();
+  }
+
   @Test(expected = ConnectionException.class)
-  public void runCommandAsynchronouslyShouldThrowOriginalExceptionOnFail()
+  public void runCommandAsynchronouslyShouldProperlyShutDownConnectionOnJoinAndSessionCloseFail()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    BlockingQueue clientDisconnectQueue = new LinkedBlockingQueue();
+    doAnswer(new BlockingWaitAnswer(clientDisconnectQueue)).when(mMockSSHClient).disconnect();
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+    doThrow(ConnectionException.class).when(mockSession).close();
+    doThrow(ConnectionException.class).when(mockCommand).join();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
+    try {
+      process.waitFor();
+      fail();
+    } catch (ConnectionException e) {
+      clientDisconnectQueue.take();
+      verify(mockCommand, never()).close();
+      verify(mMockSSHClient).disconnect();
+      throw e;
+    }
+  }
+
+  @Test(expected = ConnectionException.class)
+  public void runCommandAsynchronouslyShouldProperlyShutDownConnectionOnDestroyBlockingProcess()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+    BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
+    doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
+    verify(mockSession).exec(contains(StringUtils.join(command, " ")));
+    verify(mockCommand, never()).close();
+    verify(mockSession, never()).close();
+    verify(mMockSSHClient, never()).disconnect();
+    process.destroy();
+    verify(mMockSSHClient).disconnect();
+    joinAnswers.put(new ConnectionException("unit test error"));
+    process.waitFor();
+  }
+
+  @Test(expected = ConnectionException.class)
+  public void runCommandAsynchronouslyShouldThrowExceptionOnExecFailAndDisconnectSSHClient()
       throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
@@ -289,7 +419,51 @@ public class SSHEnvironmentTest {
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommandAsynchronously(command);
+    verify(mMockSSHClient).disconnect();
   }
 
-  //TODO runCommandAsync tests
+  @Test(expected = ConnectionException.class)
+  public void runCommandAsynchronouslyShouldThrowExceptionOnExecFailAndDisconnectSSHClientFail()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    doThrow(IOException.class).when(mMockSSHClient).disconnect();
+    when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
+    doThrow(new IOException()).when(mMockSSHClient).disconnect();
+    List<String> command = new LinkedList<>();
+    command.add("echo");
+    command.add("hello");
+    mSSHEnv.runCommandAsynchronously(command);
+  }
+
+  private static class BlockingAnswer implements Answer {
+    private final BlockingQueue<Object> mQueue;
+
+    public BlockingAnswer(BlockingQueue<Object> queue) {
+      mQueue = queue;
+    }
+
+    @Override
+    public Object answer(InvocationOnMock invocation) throws Throwable {
+      Object result = mQueue.take();
+      if (result instanceof Throwable) {
+        throw (Throwable) result;
+      }
+      return null;
+    }
+  }
+
+  private static class BlockingWaitAnswer implements Answer {
+    private final BlockingQueue<Object> mQueue;
+
+    public BlockingWaitAnswer(BlockingQueue<Object> queue) {
+      mQueue = queue;
+    }
+
+    @Override
+    public Object answer(InvocationOnMock invocation) throws InterruptedException {
+      mQueue.put(0);
+      return null;
+    }
+  }
 }
