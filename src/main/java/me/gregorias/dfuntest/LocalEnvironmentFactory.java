@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Milka
  */
-public class LocalEnvironmentFactory implements EnvironmentFactory {
+public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> {
   public static final String XML_ENV_CNT_FIELD = "environment-count";
   public static final String XML_DIR_PREFIX_FIELD = "dir-prefix";
 

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Milka
  */
-public class SSHEnvironmentFactory implements EnvironmentFactory {
+public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
   public static final String XML_HOSTS_FIELD = "hosts";
   public static final String XML_USERNAME_FIELD = "username";
   public static final String XML_PRIVATE_KEY_FIELD = "private-key";

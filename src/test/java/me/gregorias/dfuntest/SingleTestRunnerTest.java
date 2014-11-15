@@ -19,13 +19,13 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class SingleTestRunnerTest {
-  private SingleTestRunner<App> mSingleTestRunner = null;
+  private SingleTestRunner<Environment, App<Environment>> mSingleTestRunner = null;
 
-  private TestScript<App> mMockTestScript = null;
-  private EnvironmentFactory mMockEnvironmentFactory = null;
-  private EnvironmentPreparator mMockEnvironmentPreparator = null;
+  private TestScript<App<Environment>> mMockTestScript = null;
+  private EnvironmentFactory<Environment> mMockEnvironmentFactory = null;
+  private EnvironmentPreparator<Environment> mMockEnvironmentPreparator = null;
 
-  private ApplicationFactory<App> mMockApplicationFactory = null;
+  private ApplicationFactory<Environment, App<Environment>> mMockApplicationFactory = null;
 
   @Before
   public void setUp() {
@@ -33,7 +33,7 @@ public class SingleTestRunnerTest {
     mMockEnvironmentFactory = mock(EnvironmentFactory.class);
     mMockEnvironmentPreparator = mock(EnvironmentPreparator.class);
     mMockApplicationFactory = mock(ApplicationFactory.class);
-    mSingleTestRunner = new SingleTestRunner<>(mMockTestScript,
+    mSingleTestRunner = new SingleTestRunner<Environment, App<Environment>>(mMockTestScript,
         mMockEnvironmentFactory,
         mMockEnvironmentPreparator,
         mMockApplicationFactory);

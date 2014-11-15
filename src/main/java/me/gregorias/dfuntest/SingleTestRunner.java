@@ -3,7 +3,6 @@ package me.gregorias.dfuntest;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,22 +13,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Milka
  *
- * @param <TestedAppT>
+ * @param <EnvironmentT>
+ * @param <AppT>
  */
-public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
+public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App<EnvironmentT>>
+    implements TestRunner {
   private static final Logger LOGGER = LoggerFactory.getLogger(SingleTestRunner.class);
-  private final TestScript<TestedAppT> mScript;
+  private final TestScript<AppT> mScript;
 
-  private final EnvironmentFactory mEnvironmentFactory;
+  private final EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
 
-  private final EnvironmentPreparator mEnvironmentPreparator;
+  private final EnvironmentPreparator<EnvironmentT> mEnvironmentPreparator;
 
-  private final ApplicationFactory<TestedAppT> mApplicationFactory;
+  private final ApplicationFactory<EnvironmentT, AppT> mApplicationFactory;
 
-  public SingleTestRunner(TestScript<TestedAppT> script,
-      EnvironmentFactory environmentFactory,
-      EnvironmentPreparator environmentPreparator,
-      ApplicationFactory<TestedAppT> applicationFactory) {
+  public SingleTestRunner(TestScript<AppT> script,
+      EnvironmentFactory<EnvironmentT> environmentFactory,
+      EnvironmentPreparator<EnvironmentT> environmentPreparator,
+      ApplicationFactory<EnvironmentT, AppT> applicationFactory) {
     mScript = script;
 
     mEnvironmentFactory = environmentFactory;
@@ -43,7 +44,7 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
   public TestResult run() {
     LOGGER.info("run(): Starting preparation for test script {}.", mScript.toString());
     LOGGER.info("run(): Creating environments.");
-    Collection<Environment> envs;
+    Collection<EnvironmentT> envs;
     try {
       envs = mEnvironmentFactory.createEnvironments();
     } catch (IOException e) {
@@ -60,8 +61,8 @@ public class SingleTestRunner<TestedAppT extends App> implements TestRunner {
       return new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
     }
 
-    Collection<TestedAppT> apps = new LinkedList<>();
-    for (Environment env : envs) {
+    Collection<AppT> apps = new LinkedList<>();
+    for (EnvironmentT env : envs) {
       apps.add(mApplicationFactory.newApp(env));
     }
 

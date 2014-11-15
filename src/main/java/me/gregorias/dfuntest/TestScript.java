@@ -7,12 +7,12 @@ import java.util.Collection;
  *
  * @author Grzegorz Milka
  *
- * @param <TestedApp>
+ * @param <AppT>
  */
-public interface TestScript<TestedApp extends App> {
+public interface TestScript<AppT extends App> {
   /**
    * @param apps applications to test
    * @return result of the test
    */
-  TestResult run(Collection<TestedApp> apps);
+  TestResult run(Collection<AppT> apps);
 }

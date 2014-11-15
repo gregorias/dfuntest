@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author Grzegorz Milka
  *
  */
-public abstract class App {
+public abstract class App<EnvironmentT extends Environment> {
   private final int mId;
   private final String mName;
 
@@ -18,6 +18,11 @@ public abstract class App {
     mId = id;
     mName = name;
   }
+
+  /**
+   * @return Underlying environment
+   */
+  public abstract Environment getEnvironment();
 
   /**
    * @return Number identifying this application.
@@ -32,8 +37,6 @@ public abstract class App {
   public String getName() {
     return mName;
   }
-
-  public abstract boolean isRunning();
 
   /**
    * Starts the application and allows it to run in background.

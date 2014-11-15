@@ -2,7 +2,6 @@ package me.gregorias.dfuntest;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
 /**
  * This class given collection of environments prepares their configuration so
@@ -10,20 +9,20 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Grzegorz Milka
  */
-public interface EnvironmentPreparator {
-  void prepareEnvironments(Collection<Environment> envs) throws IOException;
+public interface EnvironmentPreparator<EnvironmentT extends Environment> {
+  void prepareEnvironments(Collection<EnvironmentT> envs) throws IOException;
 
   /**
    * Performs best-effort try to collect output and log files for report.
    *
    * @param envs prepared environments
    */
-  void collectOutputAndLogFiles(Collection<Environment> envs);
+  void collectOutputAndLogFiles(Collection<EnvironmentT> envs);
 
   /**
    * Performs best-effort try to clean prepared environments.
    *
    * @param envs prepraredEnvironments
    */
-  void cleanEnvironments(Collection<Environment> envs);
+  void cleanEnvironments(Collection<EnvironmentT> envs);
 }
