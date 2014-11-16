@@ -37,7 +37,7 @@ public class LocalEnvironmentFactoryTest {
     when(mockFileUtils.createTempDirectory(eq(dirPrefix))).thenReturn(path);
 
     LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
-    Collection<Environment> envs = factory.createEnvironments();
+    Collection<Environment> envs = factory.create();
     verify(mockFileUtils, times(envCount)).createTempDirectory(eq(dirPrefix));
     assertEquals(envCount, envs.size());
     int currentId = 0;
@@ -45,7 +45,7 @@ public class LocalEnvironmentFactoryTest {
       assertEquals(currentId, env.getId());
       currentId += 1;
     }
-    factory.destroyEnvironments(envs);
+    factory.destroy(envs);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -59,7 +59,7 @@ public class LocalEnvironmentFactoryTest {
     FileUtils mockFileUtils = mock(FileUtils.class);
 
     LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
-    factory.createEnvironments();
+    factory.create();
   }
 
   @Test
@@ -75,8 +75,8 @@ public class LocalEnvironmentFactoryTest {
     when(mockFileUtils.createTempDirectory(eq(dirPrefix))).thenReturn(path);
 
     LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
-    Collection<Environment> envs = factory.createEnvironments();
-    factory.destroyEnvironments(envs);
+    Collection<Environment> envs = factory.create();
+    factory.destroy(envs);
     verify(mockFileUtils, times(envCount)).deleteQuietly(eq(path.toFile()));
   }
 
@@ -94,7 +94,7 @@ public class LocalEnvironmentFactoryTest {
     Environment env = mock(Environment.class);
     when(env.getProperty(anyString())).thenThrow(NoSuchElementException.class);
     envs.add(env);
-    factory.destroyEnvironments(envs);
+    factory.destroy(envs);
     verify(mockFileUtils, never()).deleteQuietly(any(File.class));
   }
 }

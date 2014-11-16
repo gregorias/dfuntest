@@ -50,7 +50,7 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
     LOGGER.info("run(): Creating environments.");
     Collection<EnvironmentT> envs;
     try {
-      envs = mEnvironmentFactory.createEnvironments();
+      envs = mEnvironmentFactory.create();
     } catch (IOException e) {
       LOGGER.error("run(): Could not create environments.", e);
       return new TestResult(TestResult.Type.FAILURE, "Could not create environments.");
@@ -66,7 +66,7 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
       LOGGER.info("run(): Environments prepared: ", envs.size());
     } catch (IOException e) {
       LOGGER.error("run(): Could not prepare environments.", e);
-      mEnvironmentFactory.destroyEnvironments(envs);
+      mEnvironmentFactory.destroy(envs);
       return new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
     }
 
@@ -81,7 +81,7 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
     mEnvironmentPreparator.collectOutputAndLogFiles(envs, mReportPath);
     if (mShouldCleanEnvironments) {
       mEnvironmentPreparator.clean(envs);
-      mEnvironmentFactory.destroyEnvironments(envs);
+      mEnvironmentFactory.destroy(envs);
     }
 
     return result;

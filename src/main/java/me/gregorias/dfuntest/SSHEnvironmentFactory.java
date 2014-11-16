@@ -48,8 +48,8 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
   }
 
   @Override
-  public Collection<Environment> createEnvironments() throws IOException {
-    LOGGER.info("createEnvironments()");
+  public Collection<Environment> create() throws IOException {
+    LOGGER.info("create()");
     List<Object> hosts = mConfig.getList(XML_HOSTS_FIELD);
     if (null == hosts || hosts.isEmpty()) {
       throw new IllegalArgumentException("Hosts field does not exist or is empty.");
@@ -65,7 +65,7 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
 
     Collection<Environment> environments = new LinkedList<>();
     for (int envIdx = 0; envIdx < hosts.size(); ++envIdx) {
-      LOGGER.trace("createEnvironments(): Setting up environment for host: {}.",
+      LOGGER.trace("create(): Setting up environment for host: {}.",
           hosts.get(envIdx).toString());
       final Environment env = new SSHEnvironment(envIdx,
         username,
@@ -81,7 +81,7 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
   }
 
   @Override
-  public void destroyEnvironments(Collection<Environment> envs) {
-    LOGGER.info("destroyEnvironments()");
+  public void destroy(Collection<Environment> envs) {
+    LOGGER.info("destroy()");
   }
 }

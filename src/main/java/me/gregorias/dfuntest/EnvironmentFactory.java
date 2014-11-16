@@ -9,12 +9,12 @@ import java.util.Collection;
  * @author Grzegorz Milka
  */
 public interface EnvironmentFactory<EnvironmentT extends Environment> {
-  Collection<EnvironmentT> createEnvironments() throws IOException;
+  Collection<EnvironmentT> create() throws IOException;
 
   /**
-   * Cleans up everything created by createEnvironments.
+   * Cleans up everything created by create.
    *
-   * @param envs - environments created by createEnvironments.
+   * @param envs - environments created by create.
    */
-  void destroyEnvironments(Collection<EnvironmentT> envs);
+  void destroy(Collection<EnvironmentT> envs);
 }

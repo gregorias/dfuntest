@@ -18,7 +18,7 @@ public class SSHEnvironmentFactoryTest {
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    Collection<Environment> envs = sshEnvironmentFactory.createEnvironments();
+    Collection<Environment> envs = sshEnvironmentFactory.create();
 
     final int expectedEnvironmentCount = 2;
     assertEquals(expectedEnvironmentCount, envs.size());
@@ -37,7 +37,7 @@ public class SSHEnvironmentFactoryTest {
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    sshEnvironmentFactory.createEnvironments();
+    sshEnvironmentFactory.create();
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -47,7 +47,7 @@ public class SSHEnvironmentFactoryTest {
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    sshEnvironmentFactory.createEnvironments();
+    sshEnvironmentFactory.create();
   }
 
   @Test
@@ -58,7 +58,7 @@ public class SSHEnvironmentFactoryTest {
     config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
     config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    Collection<Environment> envs = sshEnvironmentFactory.createEnvironments();
-    sshEnvironmentFactory.destroyEnvironments(envs);
+    Collection<Environment> envs = sshEnvironmentFactory.create();
+    sshEnvironmentFactory.destroy(envs);
   }
 }

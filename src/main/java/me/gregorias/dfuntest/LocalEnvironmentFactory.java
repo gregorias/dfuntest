@@ -46,8 +46,8 @@ public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> 
   }
 
   @Override
-  public Collection<Environment> createEnvironments() throws IOException {
-    LOGGER.info("createEnvironments()");
+  public Collection<Environment> create() throws IOException {
+    LOGGER.info("create()");
     int count = mConfig.getInteger(XML_ENV_CNT_FIELD, 0);
     if (count <= 0) {
       throw new IllegalArgumentException(
@@ -67,8 +67,8 @@ public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> 
   }
 
   @Override
-  public void destroyEnvironments(Collection<Environment> envs) {
-    LOGGER.info("destroyEnvironments()");
+  public void destroy(Collection<Environment> envs) {
+    LOGGER.info("destroy()");
     for (Environment env: envs) {
       Path dirPath;
       try {

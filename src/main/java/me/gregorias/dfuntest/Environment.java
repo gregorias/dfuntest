@@ -19,7 +19,6 @@ public interface Environment {
    *
    * @param srcPath Local source path.
    * @param destRelPath Relative destination directory on this environment.
-   * @throws IOException
    */
   void copyFilesFromLocalDisk(Path srcPath, String destRelPath) throws IOException;
 
@@ -28,7 +27,6 @@ public interface Environment {
    *
    * @param srcRelPath Relative source path on this environment.
    * @param destPath Local destination directory.
-   * @throws IOException
    */
   void copyFilesToLocalDisk(String srcRelPath, Path destPath) throws IOException;
 
@@ -61,8 +59,6 @@ public interface Environment {
    *
    * @param command Command to run
    * @return Finished process.
-   * @throws InterruptedException
-   * @throws IOException
    */
   RemoteProcess runCommand(List<String> command) throws InterruptedException, IOException;
 
@@ -72,7 +68,6 @@ public interface Environment {
    * Removes specified file. If path targets a directory its content is removed as well.
    *
    * @param relPath Relative path to file on this environment.
-   * @throws IOException
    */
   void removeFile(String relPath) throws InterruptedException, IOException;
 
