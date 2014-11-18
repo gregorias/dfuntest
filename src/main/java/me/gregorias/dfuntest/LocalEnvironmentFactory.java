@@ -13,15 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory of {@link LocalEnvironment}.
- *
- * This factory uses {@link Configuration} to specify environment configuration.
- * Configuration uses following fields:
- * <ul>
- * <li> environment-count - Number of local environments to create. Has to be positive. </li>
- * <li> dir-prefix - Temporary directory prefix used for creating local
- *  environment in system's temporary directory. Default value is dfuntest. </li>
- * </ul>
+ * Factory of {@link LocalEnvironment} working in local temporary directories.
  *
  * @author Grzegorz Milka
  */
@@ -33,6 +25,11 @@ public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> 
   private final String mDirPrefix;
   private final FileUtils mFileUtils;
 
+  /**
+   * @param environmentCount number of environments create will make
+   * @param dirPrefix directory prefix used for creating temporary directories
+   * @param fileUtils FileUtils to use
+   */
   public LocalEnvironmentFactory(int environmentCount, String dirPrefix, FileUtils fileUtils) {
     if (environmentCount <= 0) {
       throw new IllegalArgumentException("Number of environments was nonpositive.");
