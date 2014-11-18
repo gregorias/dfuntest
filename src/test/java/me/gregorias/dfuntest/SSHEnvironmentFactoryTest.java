@@ -5,19 +5,34 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
 public class SSHEnvironmentFactoryTest {
+  private static final String mUsername = "username";
+  private static final Path mPrivateKeyPath = FileSystems.getDefault().getPath("./private_key");
+  private static final String mRemoteDir = ".";
+  private final Executor mExecutor = Executors.newSingleThreadExecutor();
+
   @Test
-  public void createShouldCreateEnvironmsentForEveryHost() throws IOException {
-    Configuration config = new XMLConfiguration();
-    config.setProperty(SSHEnvironmentFactory.XML_HOSTS_FIELD, "localhost, 127.0.0.1");
-    config.setProperty(SSHEnvironmentFactory.XML_USERNAME_FIELD, "username");
-    config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
-    config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
-    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
+  public void createShouldCreateEnvironmentForEveryHost() throws IOException {
+    Collection<InetAddress> hosts = new LinkedList<>();
+    hosts.add(InetAddress.getByName("localhost"));
+    hosts.add(InetAddress.getByName("127.0.0.1"));
+    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(
+        hosts,
+        mUsername,
+        mPrivateKeyPath,
+        mRemoteDir,
+        mExecutor);
+
     Collection<Environment> envs = sshEnvironmentFactory.create();
 
     final int expectedEnvironmentCount = 2;
@@ -31,33 +46,28 @@ public class SSHEnvironmentFactoryTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void createShouldThrowExceptionOnEmptyHostsField() throws IOException {
-    Configuration config = new XMLConfiguration();
-    config.setProperty(SSHEnvironmentFactory.XML_USERNAME_FIELD, "username");
-    config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
-    config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
-    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    sshEnvironmentFactory.create();
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void createShouldThrowExceptionOnEmptyUsernameField() throws IOException {
-    Configuration config = new XMLConfiguration();
-    config.setProperty(SSHEnvironmentFactory.XML_HOSTS_FIELD, "localhost, 127.0.0.1");
-    config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
-    config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
-    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
-    sshEnvironmentFactory.create();
+  public void createShouldThrowExceptionOnEmptyHostsList() throws IOException {
+    Collection<InetAddress> hosts = new LinkedList<>();
+    new SSHEnvironmentFactory(
+        hosts,
+        mUsername,
+        mPrivateKeyPath,
+        mRemoteDir,
+        mExecutor);
   }
 
   @Test
   public void destroyShouldNotThrowException() throws IOException {
-    Configuration config = new XMLConfiguration();
-    config.setProperty(SSHEnvironmentFactory.XML_HOSTS_FIELD, "localhost, 127.0.0.1");
-    config.setProperty(SSHEnvironmentFactory.XML_USERNAME_FIELD, "username");
-    config.setProperty(SSHEnvironmentFactory.XML_PRIVATE_KEY_FIELD, "./private_key");
-    config.setProperty(SSHEnvironmentFactory.XML_REMOTE_DIR_FIELD, ".");
-    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(config);
+    Collection<InetAddress> hosts = new LinkedList<>();
+    hosts.add(InetAddress.getByName("localhost"));
+    hosts.add(InetAddress.getByName("127.0.0.1"));
+    SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(
+        hosts,
+        mUsername,
+        mPrivateKeyPath,
+        mRemoteDir,
+        mExecutor);
+
     Collection<Environment> envs = sshEnvironmentFactory.create();
     sshEnvironmentFactory.destroy(envs);
   }
