@@ -1,9 +1,11 @@
 package me.gregorias.dfuntest;
 
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Builder of SingleTestRunner instance
+ * Builder of SingleTestRunner instance.
  */
 public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<EnvironmentT>> {
   private EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
