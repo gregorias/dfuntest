@@ -1,8 +1,6 @@
 package me.gregorias.dfuntest;
 
 import me.gregorias.dfuntest.util.FileUtils;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.XMLConfiguration;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,15 +26,14 @@ public class LocalEnvironmentFactoryTest {
   public void createEnvironmentsShouldCreateLocalEnvironments() throws IOException {
     final int envCount = 5;
     final String dirPrefix = "unittest";
-    Configuration config = new XMLConfiguration();
-    config.setProperty(LocalEnvironmentFactory.XML_ENV_CNT_FIELD, envCount);
-    config.setProperty(LocalEnvironmentFactory.XML_DIR_PREFIX_FIELD, dirPrefix);
 
     FileUtils mockFileUtils = mock(FileUtils.class);
     Path path = mock(Path.class);
     when(mockFileUtils.createTempDirectory(eq(dirPrefix))).thenReturn(path);
 
-    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
+    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(envCount,
+        dirPrefix,
+        mockFileUtils);
     Collection<Environment> envs = factory.create();
     verify(mockFileUtils, times(envCount)).createTempDirectory(eq(dirPrefix));
     assertEquals(envCount, envs.size());
@@ -49,32 +46,27 @@ public class LocalEnvironmentFactoryTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void createEnvironmentsShouldThrowExceptionOnZeroEnvCount() throws IOException {
+  public void constructorShouldThrowExceptionOnZeroEnvCount() throws IOException {
     final int envCount = 0;
     final String dirPrefix = "unittest";
-    Configuration config = new XMLConfiguration();
-    config.setProperty(LocalEnvironmentFactory.XML_ENV_CNT_FIELD, envCount);
-    config.setProperty(LocalEnvironmentFactory.XML_DIR_PREFIX_FIELD, dirPrefix);
 
     FileUtils mockFileUtils = mock(FileUtils.class);
 
-    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
-    factory.create();
+    new LocalEnvironmentFactory(envCount, dirPrefix, mockFileUtils);
   }
 
   @Test
   public void destroyEnvironmentsShouldDisposeOfCreatedEnvironmentsDirectory() throws IOException {
     final int envCount = 5;
     final String dirPrefix = "unittest";
-    Configuration config = new XMLConfiguration();
-    config.setProperty(LocalEnvironmentFactory.XML_ENV_CNT_FIELD, envCount);
-    config.setProperty(LocalEnvironmentFactory.XML_DIR_PREFIX_FIELD, dirPrefix);
 
     FileUtils mockFileUtils = mock(FileUtils.class);
     Path path = mock(Path.class);
     when(mockFileUtils.createTempDirectory(eq(dirPrefix))).thenReturn(path);
 
-    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
+    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(envCount,
+        dirPrefix,
+        mockFileUtils);
     Collection<Environment> envs = factory.create();
     factory.destroy(envs);
     verify(mockFileUtils, times(envCount)).deleteQuietly(eq(path.toFile()));
@@ -82,14 +74,13 @@ public class LocalEnvironmentFactoryTest {
 
   @Test
   public void destroyEnvironmentsShouldNotDoAnythingWhenGivenWrongEnvironment() throws IOException {
-    final int envCount = 0;
+    final int envCount = 1;
     final String dirPrefix = "unittest";
-    Configuration config = new XMLConfiguration();
-    config.setProperty(LocalEnvironmentFactory.XML_ENV_CNT_FIELD, envCount);
-    config.setProperty(LocalEnvironmentFactory.XML_DIR_PREFIX_FIELD, dirPrefix);
     FileUtils mockFileUtils = mock(FileUtils.class);
 
-    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(config, mockFileUtils);
+    LocalEnvironmentFactory factory = new LocalEnvironmentFactory(envCount,
+        dirPrefix,
+        mockFileUtils);
     Collection<Environment> envs = new LinkedList<>();
     Environment env = mock(Environment.class);
     when(env.getProperty(anyString())).thenThrow(NoSuchElementException.class);

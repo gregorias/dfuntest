@@ -26,39 +26,35 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Milka
  */
 public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> {
-  public static final String XML_ENV_CNT_FIELD = "environment-count";
-  public static final String XML_DIR_PREFIX_FIELD = "dir-prefix";
-
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalEnvironmentFactory.class);
-  private static final String DEFAULT_DIR_PREFIX = "dfuntest";
   private static final String ENV_CONFIG_ROOT_DIR = "local-environment-factory-root-dir";
 
-  private final Configuration mConfig;
+  private final int mEnvironmentCount;
+  private final String mDirPrefix;
   private final FileUtils mFileUtils;
 
-  public LocalEnvironmentFactory(Configuration config, FileUtils fileUtils) {
-    mConfig = config;
+  public LocalEnvironmentFactory(int environmentCount, String dirPrefix, FileUtils fileUtils) {
+    if (environmentCount <= 0) {
+      throw new IllegalArgumentException("Number of environments was nonpositive.");
+    }
+    mEnvironmentCount = environmentCount;
+    mDirPrefix = dirPrefix;
     mFileUtils = fileUtils;
   }
 
-  public LocalEnvironmentFactory(Configuration config) {
-    this(config, FileUtilsImpl.getFileUtilsImpl());
+  public LocalEnvironmentFactory(int environmentCount,
+                                 String dirPrefix) {
+    this(environmentCount, dirPrefix, FileUtilsImpl.getFileUtilsImpl());
   }
 
   @Override
   public Collection<Environment> create() throws IOException {
     LOGGER.info("create()");
-    int count = mConfig.getInteger(XML_ENV_CNT_FIELD, 0);
-    if (count <= 0) {
-      throw new IllegalArgumentException(
-          "Number of environments has not been provided or was invalid.");
-    }
-    String dirPrefix = mConfig.getString(XML_DIR_PREFIX_FIELD, DEFAULT_DIR_PREFIX);
 
     Collection<Environment> environments = new LinkedList<>();
-    for (int envIdx = 0; envIdx < count; ++envIdx) {
+    for (int envIdx = 0; envIdx < mEnvironmentCount; ++envIdx) {
       Path tempDirPath;
-      tempDirPath = mFileUtils.createTempDirectory(dirPrefix);
+      tempDirPath = mFileUtils.createTempDirectory(mDirPrefix);
       LocalEnvironment env = new LocalEnvironment(envIdx, tempDirPath, mFileUtils);
       env.setProperty(ENV_CONFIG_ROOT_DIR, tempDirPath);
       environments.add(env);
