@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 public class SSHEnvironmentFactoryTest {
   private static final String mUsername = "username";
   private static final Path mPrivateKeyPath = FileSystems.getDefault().getPath("./private_key");

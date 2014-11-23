@@ -10,6 +10,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
+apply plugin: 'pmd'
 apply plugin: 'signing'
 
 def DEPENDENCY_LIB_DIRECTORY = 'lib/'
@@ -91,7 +92,7 @@ tasks.withType(FindBugs) {
 
 /* Generate gradlew and gradle wrappers for portable gradle use */
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.1'
+  gradleVersion = '2.2'
 }
 
 signing {
