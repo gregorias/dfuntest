@@ -22,6 +22,16 @@ if (!hasProperty('ossrhUsername')) {
 group = 'me.gregorias'
 version = '0.4'
 
+sourceSets {
+  example
+}
+
+configurations {
+  example
+  exampleCompile.extendsFrom compile
+  exampleRuntime.extendsFrom runtime
+}
+
 repositories {
   mavenCentral()
 }
@@ -67,9 +77,15 @@ task sourceJar(type: Jar) {
   from sourceSets.main.allSource
 }
 
+task exampleJar(type: Jar) {
+  classifier = 'example'
+  from sourceSets.example.output
+}
+
 artifacts {
   archives sourceJar
   archives javadocJar
+  example exampleJar
 }
 
 task copyAllDependencies(type: Copy) {
