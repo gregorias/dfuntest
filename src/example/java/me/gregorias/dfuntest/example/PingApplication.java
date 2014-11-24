@@ -41,8 +41,8 @@ public class PingApplication implements Runnable {
   public static final byte PING_TYPE = 0;
   public static final byte GET_ID_TYPE = 1;
   public static final byte CLOSE_TYPE = 2;
+  public static final int PING_MESSAGE_LENGTH = 5;
   private static final Logger LOGGER = LoggerFactory.getLogger(PingApplication.class);
-  private static final int MAX_MESSAGE_LENGTH = 5;
   private static final int INTEGER_BYTE_SIZE = Integer.SIZE / Byte.SIZE;
   private static final long CLIENT_DELAY = 1;
   private static final int EXPECTED_ARGUMENT_COUNT = 4;
@@ -75,24 +75,28 @@ public class PingApplication implements Runnable {
    */
   public static void main(String[] args) {
     if (args.length != EXPECTED_ARGUMENT_COUNT) {
-      System.err.println("Incorrect arguments provided.");
+      LOGGER.error("Incorrect arguments provided.");
       return;
     }
-    int id;
-    int localPort;
-    String hostname = args[2];
-    int remotePort;
     try {
-      id = Integer.parseInt(args[0]);
-      localPort = Integer.parseInt(args[1]);
-      remotePort = Integer.parseInt(args[3]);
-    } catch (NumberFormatException e) {
-      System.err.println("Incorrect arguments provided.");
-      return;
+      int id;
+      int localPort;
+      String hostname = args[2];
+      int remotePort;
+      try {
+        id = Integer.parseInt(args[0]);
+        localPort = Integer.parseInt(args[1]);
+        remotePort = Integer.parseInt(args[3]);
+      } catch (NumberFormatException e) {
+        LOGGER.error("Incorrect arguments provided.");
+        return;
+      }
+      InetSocketAddress serverSocketAddress = new InetSocketAddress(hostname, remotePort);
+      PingApplication app = new PingApplication(id, localPort, serverSocketAddress);
+      app.run();
+    } catch (RuntimeException e) {
+      LOGGER.error("Caught runtime exception.", e);
     }
-    InetSocketAddress serverSocketAddress = new InetSocketAddress(hostname, remotePort);
-    PingApplication app = new PingApplication(id, localPort, serverSocketAddress);
-    app.run();
   }
 
   @Override
@@ -107,6 +111,7 @@ public class PingApplication implements Runnable {
       SocketAddress localAddress = new InetSocketAddress(mLocalPort);
       serverSocketChannel.bind(localAddress, 1);
       while (!mIsClosed) {
+        LOGGER.debug("run(): Ready to handle new connection.");
         try (SocketChannel socketChannel = serverSocketChannel.accept()) {
           LOGGER.debug("run(): Accepted new connection.");
           socketChannel.configureBlocking(true);
@@ -116,17 +121,20 @@ public class PingApplication implements Runnable {
     } catch (IOException e) {
       LOGGER.error("run()", e);
     }
+    LOGGER.info("run(): Shutting down ping task.");
     mScheduledExecutorService.shutdown();
     try {
       mScheduledExecutorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }
+    LOGGER.info("run() -> void");
   }
 
   private class ClientTask implements Runnable {
     @Override
     public void run() {
+      LOGGER.debug("ClientTask.run()");
       try (SocketChannel channel = SocketChannel.open(mServerSocketAddress)) {
         writeEntireBufferAndHideException(channel, mPingBuffer);
       } catch (IOException e) {
@@ -159,7 +167,8 @@ public class PingApplication implements Runnable {
   }
 
   private void handleClientConnection(SocketChannel socketChannel) {
-    byte[] messageArray = new byte[MAX_MESSAGE_LENGTH];
+    LOGGER.debug("handleClientConnection()");
+    byte[] messageArray = new byte[PING_MESSAGE_LENGTH];
     ByteBuffer initialMessageBuffer = ByteBuffer.wrap(messageArray);
     try {
       readInitialMessage(socketChannel, initialMessageBuffer);
@@ -174,6 +183,7 @@ public class PingApplication implements Runnable {
     }
 
     byte type = initialMessageBuffer.get();
+    LOGGER.debug("handleClientConnection(): Received message of type: {}", type);
     switch (type) {
       case PING_TYPE:
         try {
@@ -188,7 +198,7 @@ public class PingApplication implements Runnable {
         break;
       case CLOSE_TYPE:
         try {
-          LOGGER.info("handleClientConnection(): Received close order.");
+          LOGGER.debug("handleClientConnection(): Received close order.");
           waitForClientClose(socketChannel);
           socketChannel.shutdownOutput();
         } catch (IOException e) {
@@ -202,7 +212,7 @@ public class PingApplication implements Runnable {
   }
 
   private ByteBuffer preparePingBuffer(int id) {
-    ByteBuffer buffer = ByteBuffer.allocate(MAX_MESSAGE_LENGTH);
+    ByteBuffer buffer = ByteBuffer.allocate(PING_MESSAGE_LENGTH);
     buffer.put(PING_TYPE);
     buffer.putInt(id);
     buffer.flip();
@@ -220,14 +230,14 @@ public class PingApplication implements Runnable {
   private void sendPingedIDs(SocketChannel socketChannel) {
     synchronized (mPingedIDs) {
       writeEntireBufferAndHideException(socketChannel, mResponseBuffer);
-      mResponseBuffer.reset();
+      mResponseBuffer.rewind();
     }
   }
 
   private void waitForClientClose(SocketChannel socketChannel) throws IOException {
     int readCount = 0;
     while (readCount != -1) {
-      ByteBuffer sponge = ByteBuffer.wrap(new byte[MAX_MESSAGE_LENGTH]);
+      ByteBuffer sponge = ByteBuffer.wrap(new byte[PING_MESSAGE_LENGTH]);
       readCount = socketChannel.read(sponge);
     }
   }

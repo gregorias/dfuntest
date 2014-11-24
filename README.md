@@ -24,7 +24,7 @@ dfuntest is available in central Maven repository under following credentials:
 
     groupId: me.gregorias
     artifactId: dfuntest
-    version: 0.3
+    version: 0.4
 
 dfuntest architecture is based on easily implementable interfaces, some of which
 are provided by dfuntest and others need to be implemented to fit into
@@ -40,6 +40,24 @@ To use dfuntest you need to first prepare your project:
   interface.
 * For each test scenario write a TestScript.
 * Run tests using available TestRunners or define your own.
+
+Running Example package
+-----------------------
+
+There is a simple example project in <code>me.gregorias.dfuntest.example</code>.
+It shows a simple distributed application which is testable by dfuntest. To for
+example run this code in 5 instances on local machine perform the following:
+
+    ./gradlew build buildExample copyAllDependencies
+    cp ./build/libs/dfuntest.*example.jar ./dfuntest-example.jar
+    cp ./build/libs/dfuntest.*.jar ./lib/
+    java -cp dfuntest-example:lib/* me.gregorias.dfuntest.example.ExampleMain
+      sanity 9000 local 5
+
+This should end successfully and download logs to <code>report/</code>
+directory.
+
+Advanced usage is explained in javadocs.
 
 Building
 ========

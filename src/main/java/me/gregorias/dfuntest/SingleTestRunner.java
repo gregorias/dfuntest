@@ -63,7 +63,7 @@ public class SingleTestRunner<EnvironmentT extends Environment, AppT extends App
         LOGGER.info("run(): Restoring environments.");
         mEnvironmentPreparator.restore(envs);
       }
-      LOGGER.info("run(): Environments prepared: ", envs.size());
+      LOGGER.info("run(): Environments prepared: {}", envs.size());
     } catch (IOException e) {
       LOGGER.error("run(): Could not prepare environments.", e);
       mEnvironmentFactory.destroy(envs);

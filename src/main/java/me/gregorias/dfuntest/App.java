@@ -47,5 +47,5 @@ public abstract class App<EnvironmentT extends Environment> {
    * Shuts down started application and deallocates all resources associated
    * with running application.
    */
-  public abstract void shutDown() throws IOException;
+  public abstract void shutDown() throws IOException, InterruptedException;
 }
