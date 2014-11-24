@@ -1,5 +1,6 @@
 bin
 build
+lib
 .checkstyle
 .classpath
 .gradle
@@ -7,4 +8,7 @@ build
 .settings
 
 *.iml
+*.ipr
+*.iws
+*.jar
 *.swp
