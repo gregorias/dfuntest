@@ -45,13 +45,13 @@ Running Example package
 -----------------------
 
 There is a simple example project in <code>me.gregorias.dfuntest.example</code>.
-It shows a simple distributed application which is testable by dfuntest. To for
-example run this code in 5 instances on local machine perform the following:
+It shows a simple distributed application which is testable by dfuntest. To, for
+example, run this code in 5 instances on local machine perform the following:
 
     ./gradlew build buildExample copyAllDependencies
     cp ./build/libs/dfuntest.*example.jar ./dfuntest-example.jar
     cp ./build/libs/dfuntest.*.jar ./lib/
-    java -cp dfuntest-example:lib/* me.gregorias.dfuntest.example.ExampleMain
+    java -cp dfuntest-example:lib/* me.gregorias.dfuntest.example.ExampleMain\
       sanity 9000 local 5
 
 This should end successfully and download logs to <code>report/</code>
