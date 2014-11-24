@@ -46,7 +46,7 @@ Running Example package
 
 There is a simple example project in <code>me.gregorias.dfuntest.example</code>.
 It shows a simple distributed application which is testable by dfuntest. To, for
-example, run this code in 5 instances on local machine perform the following:
+example, run this code on 5 instances on local machine perform the following:
 
     ./gradlew build buildExample copyAllDependencies
     cp ./build/libs/dfuntest*example.jar ./dfuntest-example.jar
