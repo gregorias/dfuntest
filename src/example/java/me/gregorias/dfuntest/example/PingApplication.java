@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A simple network client/server. Instances of this application listen on a TCP connection waiting
- * for messages and requests and also occasionally ping suggested server. On ping 
+ * for messages and requests and also occasionally ping suggested server. On ping
  *
  * End of message is signalled by output connection shutdown from the sending side.
  * The application handles following message format:
