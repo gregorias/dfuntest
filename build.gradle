@@ -43,8 +43,9 @@ dependencies {
   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
   testCompile group: 'junit', name: 'junit', version: '4.11'
   testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.8'
-  exampleCompile sourceSets.main.output
+  exampleCompile files(jar.archivePath)
   runtime group: 'com.jcraft', name: 'jzlib', version: '1.1.3'
+  exampleRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.7'
 }
 
 compileJava {
@@ -92,6 +93,11 @@ task sourceJar(type: Jar) {
 task exampleJar(type: Jar) {
   classifier = 'example'
   from sourceSets.example.output
+  manifest {
+    attributes 'Main-Class': 'me.gregorias.dfuntest.example.ExampleMain',
+               'Class-Path': generateClassPath(configurations.exampleRuntime,
+                 DEPENDENCY_LIB_DIRECTORY)
+  }
 }
 
 task exampleJavadocJar(type: Jar, dependsOn: exampleJavadoc) {
@@ -112,8 +118,13 @@ artifacts {
   example exampleSourceJar
 }
 
-task copyAllDependencies(type: Copy) {
+task copyRuntimeDependencies(type: Copy) {
   from configurations.runtime
+  into DEPENDENCY_LIB_DIRECTORY
+}
+
+task copyExampleRuntimeDependencies(type: Copy) {
+  from configurations.exampleRuntime
   into DEPENDENCY_LIB_DIRECTORY
 }
 
@@ -228,4 +239,8 @@ gradle.taskGraph.beforeTask { taskGraph ->
       }
     }
   }
+}
+
+def generateClassPath(configurationSet, prefix) {
+  configurationSet.collect { prefix + it.getName() }.join(" ")
 }

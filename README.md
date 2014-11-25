@@ -49,11 +49,9 @@ It shows a simple distributed application which is testable by dfuntest. To, for
 example, run all prepared test scripts on 5 instances on local machine perform
 the following:
 
-    ./gradlew build buildExample copyAllDependencies
+    ./gradlew build buildExample copyExampleRuntimeDependencies
     cp ./build/libs/dfuntest*example.jar ./dfuntest-example.jar
-    cp ./build/libs/dfuntest*.jar ./lib/
-    java -cp dfuntest-example:lib/* me.gregorias.dfuntest.example.ExampleMain\
-      9000 local 5
+    java -jar dfuntest-example.jar 9000 local 5
 
 This should end successfully and download logs to <code>report/</code>
 directory.
