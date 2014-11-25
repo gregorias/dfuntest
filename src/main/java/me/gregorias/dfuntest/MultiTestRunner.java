@@ -107,6 +107,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       } catch (IOException e) {
         LOGGER.error("run(): Could not prepare environments for test {}.", script, e);
         result = new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
+        hasWrittenToSummary = saveResultToSummaryReportFile(result, script, !hasWrittenToSummary);
         continue;
       }
 
@@ -127,8 +128,8 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       LOGGER.info("run(): Collecting output and log files.");
       Path testReportPath = mReportPath.resolve(script.toString());
       mEnvironmentPreparator.collectOutputAndLogFiles(envs, testReportPath);
-      saveResultToReportFile(scriptResult, script, testReportPath, !hasWrittenToSummary);
-      hasWrittenToSummary = true;
+      hasWrittenToSummary = saveResultToSummaryReportFile(result, script, !hasWrittenToSummary);
+      saveResultToScriptReportFile(result, testReportPath);
       if (mShouldPrepareEnvironments && mShouldCleanEnvironments) {
         mEnvironmentPreparator.clean(envs);
         hasPrepared = false;
@@ -142,9 +143,8 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     return result;
   }
 
-  private void saveResultToReportFile(TestResult scriptResult,
+  private boolean saveResultToSummaryReportFile(TestResult scriptResult,
                                       TestScript<AppT> script,
-                                      Path testScriptReportPath,
                                       boolean shouldTruncate) {
     String resultString;
     if (scriptResult.getType() == TestResult.Type.FAILURE) {
@@ -158,6 +158,17 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       mFileUtils.write(mSummaryReportPath, content, shouldTruncate);
     } catch (IOException e) {
       LOGGER.warn("saveResultToReportFile(): Could not append to summary report file.", e);
+      return false;
+    }
+    return true;
+  }
+
+  private void saveResultToScriptReportFile(TestResult scriptResult, Path testScriptReportPath) {
+    String resultString;
+    if (scriptResult.getType() == TestResult.Type.FAILURE) {
+      resultString = "[FAILURE]";
+    } else {
+      resultString = "[SUCCESS]";
     }
 
     try {

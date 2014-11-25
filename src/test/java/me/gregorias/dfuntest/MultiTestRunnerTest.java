@@ -271,4 +271,88 @@ public class MultiTestRunnerTest {
         MultiTestRunner.REPORT_FILENAME);
     verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
   }
+
+  @Test
+  public void runShouldContinueEvenIfWriteSummaryFails() throws IOException {
+    String firstTestScriptName = "FirstTestScript";
+    String secondTestScriptName = "SecondTestScript";
+    TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
+    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    scripts.add(mMockTestScript);
+    scripts.add(secondMockTestScript);
+    MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
+        mMockEnvironmentFactory,
+        mMockEnvironmentPreparator,
+        mMockApplicationFactory,
+        true,
+        true,
+        mReportPath,
+        mMockFileUtils);
+
+    Collection<Environment> envs = new ArrayList<>();
+    Environment mockEnv = mock(Environment.class);
+    envs.add(mockEnv);
+    when(mMockEnvironmentFactory.create()).thenReturn(envs);
+    when(mMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(mMockTestScript.toString()).thenReturn(firstTestScriptName);
+    when(secondMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(secondMockTestScript.toString()).thenReturn(secondTestScriptName);
+    Path expectedSummaryReportPath = mReportPath.resolve(MultiTestRunner.REPORT_FILENAME);
+    Path expectedFirstReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+    Path expectedSecondReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+
+    doThrow(IOException.class).when(mMockFileUtils).write(
+        eq(expectedSummaryReportPath), anyString(), eq(true));
+
+    multiTestRunner.run();
+
+    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString(), eq(true));
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
+  }
+
+  @Test
+  public void runShouldContinueEvenIfWriteScriptReportFails() throws IOException {
+    String firstTestScriptName = "FirstTestScript";
+    String secondTestScriptName = "SecondTestScript";
+    TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
+    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    scripts.add(mMockTestScript);
+    scripts.add(secondMockTestScript);
+    MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
+        mMockEnvironmentFactory,
+        mMockEnvironmentPreparator,
+        mMockApplicationFactory,
+        true,
+        true,
+        mReportPath,
+        mMockFileUtils);
+
+    Collection<Environment> envs = new ArrayList<>();
+    Environment mockEnv = mock(Environment.class);
+    envs.add(mockEnv);
+    when(mMockEnvironmentFactory.create()).thenReturn(envs);
+    when(mMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(mMockTestScript.toString()).thenReturn(firstTestScriptName);
+    when(secondMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(secondMockTestScript.toString()).thenReturn(secondTestScriptName);
+    Path expectedSummaryReportPath = mReportPath.resolve(MultiTestRunner.REPORT_FILENAME);
+    Path expectedFirstReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+    Path expectedSecondReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+
+    doThrow(IOException.class).when(mMockFileUtils).write(
+        eq(expectedFirstReportPath), anyString(), eq(true));
+
+    multiTestRunner.run();
+
+    verify(mMockFileUtils).write(eq(expectedSummaryReportPath), anyString(), eq(true));
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
+  }
 }
