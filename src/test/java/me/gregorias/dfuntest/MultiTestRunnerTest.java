@@ -1,5 +1,6 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
@@ -36,6 +38,7 @@ public class MultiTestRunnerTest {
       mock(ApplicationFactory.class);
 
   private final Path mReportPath = FileSystems.getDefault().getPath("reportDir");
+  private final FileUtils mMockFileUtils = mock(FileUtils.class);
 
   @Before
   public void setUp() {
@@ -45,7 +48,8 @@ public class MultiTestRunnerTest {
         mMockApplicationFactory,
         true,
         true,
-        mReportPath);
+        mReportPath,
+        mMockFileUtils);
   }
 
   @Test
@@ -100,7 +104,8 @@ public class MultiTestRunnerTest {
         mMockApplicationFactory,
         false,
         false,
-        mReportPath);
+        mReportPath,
+        mMockFileUtils);
 
     Collection<Environment> envs = new LinkedList<>();
     Environment mockEnv = mock(Environment.class);
@@ -132,7 +137,8 @@ public class MultiTestRunnerTest {
         mMockApplicationFactory,
         false,
         false,
-        mReportPath);
+        mReportPath,
+        mMockFileUtils);
 
     Collection<Environment> envs = new LinkedList<>();
     Environment mockEnv = mock(Environment.class);
@@ -167,7 +173,8 @@ public class MultiTestRunnerTest {
         mMockApplicationFactory,
         true,
         false,
-        mReportPath);
+        mReportPath,
+        mMockFileUtils);
 
     Collection<Environment> envs = new LinkedList<>();
     Environment mockEnv = mock(Environment.class);
@@ -201,7 +208,8 @@ public class MultiTestRunnerTest {
         mMockApplicationFactory,
         true,
         true,
-        mReportPath);
+        mReportPath,
+        mMockFileUtils);
 
     Collection<Environment> envs = new LinkedList<>();
     Environment mockEnv = mock(Environment.class);
@@ -221,5 +229,47 @@ public class MultiTestRunnerTest {
     verify(secondMockTestScript).run(anyCollection());
     verify(mMockEnvironmentPreparator, times(2)).clean(eq(envs));
     verify(mMockEnvironmentFactory).destroy(eq(envs));
+  }
+
+  @Test
+  public void runShouldCreateRaportsForEveryTestScriptAndSummary() throws IOException {
+    String firstTestScriptName = "FirstTestScript";
+    String secondTestScriptName = "SecondTestScript";
+    TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
+    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    scripts.add(mMockTestScript);
+    scripts.add(secondMockTestScript);
+    MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
+        mMockEnvironmentFactory,
+        mMockEnvironmentPreparator,
+        mMockApplicationFactory,
+        true,
+        true,
+        mReportPath,
+        mMockFileUtils);
+
+    Collection<Environment> envs = new LinkedList<>();
+    Environment mockEnv = mock(Environment.class);
+    envs.add(mockEnv);
+    when(mMockEnvironmentFactory.create()).thenReturn(envs);
+    when(mMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(mMockTestScript.toString()).thenReturn(firstTestScriptName);
+    when(secondMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+    when(secondMockTestScript.toString()).thenReturn(secondTestScriptName);
+
+    multiTestRunner.run();
+
+    Path expectedSummaryReportPath = mReportPath.resolve(MultiTestRunner.REPORT_FILENAME);
+    verify(mMockFileUtils).write(eq(expectedSummaryReportPath), anyString(), eq(true));
+
+    Path expectedFirstReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString(), eq(true));
+
+    Path expectedSecondReportPath = mReportPath.resolve(firstTestScriptName).resolve(
+        MultiTestRunner.REPORT_FILENAME);
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
   }
 }

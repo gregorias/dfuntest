@@ -1,5 +1,6 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import java.util.LinkedList;
  */
 public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<EnvironmentT>>
     implements TestRunner {
+  public static final String REPORT_FILENAME = "report.txt";
   private static final Logger LOGGER = LoggerFactory.getLogger(MultiTestRunner.class);
   private final Collection<TestScript<AppT>> mScripts;
   private final EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
@@ -31,6 +33,9 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
   private final boolean mShouldPrepareEnvironments;
   private final boolean mShouldCleanEnvironments;
   private final Path mReportPath;
+  private final FileUtils mFileUtils;
+
+  private final Path mSummaryReportPath;
 
   public MultiTestRunner(TestScript<AppT> script,
                          EnvironmentFactory<EnvironmentT> environmentFactory,
@@ -38,7 +43,8 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
                          ApplicationFactory<EnvironmentT, AppT> applicationFactory,
                          boolean shouldPrepareEnvironments,
                          boolean shouldCleanEnvironments,
-                         Path reportPath) {
+                         Path reportPath,
+                         FileUtils fileUtils) {
     mScripts = new ArrayList<>();
     mScripts.add(script);
     mEnvironmentFactory = environmentFactory;
@@ -47,6 +53,9 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     mShouldPrepareEnvironments = shouldPrepareEnvironments;
     mShouldCleanEnvironments = shouldCleanEnvironments;
     mReportPath = reportPath;
+    mFileUtils = fileUtils;
+
+    mSummaryReportPath = mReportPath.resolve(REPORT_FILENAME);
   }
 
   public MultiTestRunner(Collection<TestScript<AppT>> scripts,
@@ -55,7 +64,8 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
                          ApplicationFactory<EnvironmentT, AppT> applicationFactory,
                          boolean shouldPrepareEnvironments,
                          boolean shouldCleanEnvironments,
-                         Path reportPath) {
+                         Path reportPath,
+                         FileUtils fileUtils) {
     mScripts = scripts;
     mEnvironmentFactory = environmentFactory;
     mEnvironmentPreparator = environmentPreparator;
@@ -63,6 +73,9 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     mShouldPrepareEnvironments = shouldPrepareEnvironments;
     mShouldCleanEnvironments = shouldCleanEnvironments;
     mReportPath = reportPath;
+    mFileUtils = fileUtils;
+
+    mSummaryReportPath = mReportPath.resolve(REPORT_FILENAME);
   }
 
   @Override
@@ -78,8 +91,8 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       return new TestResult(TestResult.Type.FAILURE, "Could not create environments.");
     }
 
-    int testIdx = 0;
     boolean hasPrepared = false;
+    boolean hasWrittenToSummary = false;
     TestResult result = new TestResult(TestResult.Type.SUCCESS, "Everything went ok.");
     for (TestScript<AppT> script : mScripts) {
       try {
@@ -113,13 +126,14 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       }
 
       LOGGER.info("run(): Collecting output and log files.");
-      Path testReportPath = mReportPath.resolve(testIdx + "_" + script.toString());
+      Path testReportPath = mReportPath.resolve(script.toString());
       mEnvironmentPreparator.collectOutputAndLogFiles(envs, testReportPath);
+      saveResultToReportFile(scriptResult, script, testReportPath, !hasWrittenToSummary);
+      hasWrittenToSummary = true;
       if (mShouldPrepareEnvironments && mShouldCleanEnvironments) {
         mEnvironmentPreparator.clean(envs);
         hasPrepared = false;
       }
-      ++testIdx;
     }
 
     if (mShouldCleanEnvironments) {
@@ -127,5 +141,31 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     }
 
     return result;
+  }
+
+  private void saveResultToReportFile(TestResult scriptResult,
+                                      TestScript<AppT> script,
+                                      Path testScriptReportPath,
+                                      boolean shouldTruncate) {
+    String resultString;
+    if (scriptResult.getType() == TestResult.Type.FAILURE) {
+      resultString = "[FAILURE]";
+    } else {
+      resultString = "[SUCCESS]";
+    }
+
+    try {
+      String content = resultString + " " + script.toString();
+      mFileUtils.write(mSummaryReportPath, content, shouldTruncate);
+    } catch (IOException e) {
+      LOGGER.warn("saveResultToReportFile(): Could not append to summary report file.", e);
+    }
+
+    try {
+      String content = resultString + " " + scriptResult.getDescription();
+      mFileUtils.write(testScriptReportPath.resolve(REPORT_FILENAME), content, true);
+    } catch (IOException e) {
+      LOGGER.warn("saveResultToReportFile(): Could not append to report file.", e);
+    }
   }
 }

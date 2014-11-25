@@ -1,5 +1,7 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.util.FileUtilsImpl;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +39,8 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
         mApplicationFactory,
         mShouldPrepareEnvironments,
         mShouldCleanEnvironments,
-        mReportPath);
+        mReportPath,
+        FileUtilsImpl.getFileUtilsImpl());
   }
 
   public RunnerBuilder<EnvironmentT, AppT> setApplicationFactory(

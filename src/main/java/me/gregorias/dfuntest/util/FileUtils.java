@@ -75,4 +75,14 @@ public interface FileUtils {
    * @return process running the command
    */
   Process runCommand(List<String> command, File pwdFile) throws IOException;
+
+  /**
+   * {@link java.nio.file.Files#write(java.nio.file.Path, Iterable, java.nio.charset.Charset,
+   * java.nio.file.OpenOption...)}
+   *
+   * @param path Path of file to write to.
+   * @param content String to be written to file.
+   * @param shouldTruncate Whether file should be truncated on write.
+   */
+  void write(Path path, String content, boolean shouldTruncate) throws IOException;
 }
