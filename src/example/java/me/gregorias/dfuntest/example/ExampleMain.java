@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
  * running the TestRunner.
  *
  * The main should be run with following arguments:
- * TEST_NAME - either: sanity, pinggetid, distributedping,
  * INITIAL_PORT - initial port number assigned to first application,
  * Either:
  *   local ENV_COUNT - run tests locally with ENV_COUNT environments
@@ -43,19 +42,18 @@ import java.util.concurrent.Executors;
  */
 public class ExampleMain {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExampleMain.class);
-  private static final String USAGE = "Usage: ExampleMain (sanity | pinggetid | distributedping) "
-          +  "INITIAL_PORT (local ENV_COUNT | ssh USERNAME PRIVATE_KEY_PATH HOSTS...)";
+  private static final String USAGE = "Usage: ExampleMain INITIAL_PORT "
+      + "(local ENV_COUNT | ssh USERNAME PRIVATE_KEY_PATH HOSTS...)";
   private static final Path REPORT_PATH = FileSystems.getDefault().getPath("report");
   private static final String ENV_DIR_PREFIX = "Example";
 
   public static void main(String[] args) {
-    if (args.length < 4) {
+    if (args.length < 3) {
       LOGGER.error(USAGE);
       System.exit(1);
     }
 
-    String testType = args[0];
-    int initialPort = Integer.parseInt(args[1]);
+    int initialPort = Integer.parseInt(args[0]);
     EnvironmentFactory<Environment> environmentFactory = null;
     try {
       environmentFactory = initializeEnvironmentFactory(args);
@@ -71,21 +69,11 @@ public class ExampleMain {
     builder.setEnvironmentFactory(environmentFactory);
     builder.setEnvironmentPreparator(new ExampleEnvironmentPreparator(initialPort));
     builder.setApplicationFactory(new ExampleAppFactory());
-    switch (testType) {
-      case "sanity":
-        builder.addTestScript(new ExampleSanityTestScript());
-        break;
-      case "pinggetid":
-        builder.addTestScript(new ExamplePingGetIDTestScript());
-        break;
-      case "distributedping":
-        builder.addTestScript(new ExampleDistributedPingTestScript());
-        break;
-      default:
-        LOGGER.error("USAGE");
-        System.exit(1);
-        return;
-    }
+
+    builder.addTestScript(new ExampleSanityTestScript());
+    builder.addTestScript(new ExamplePingGetIDTestScript());
+    builder.addTestScript(new ExampleDistributedPingTestScript());
+
     builder.setShouldPrepareEnvironments(true);
     builder.setShouldCleanEnvironments(true);
     builder.setReportPath(REPORT_PATH);
@@ -109,27 +97,27 @@ public class ExampleMain {
 
   private static EnvironmentFactory<Environment> initializeEnvironmentFactory(String[] args)
       throws UnknownHostException {
-    switch (args[2]) {
+    switch (args[1]) {
       case "local":
-        int envCount = Integer.parseInt(args[3]);
+        int envCount = Integer.parseInt(args[2]);
         return new LocalEnvironmentFactory(envCount, ENV_DIR_PREFIX);
       case "ssh":
-        if (args.length < 6) {
+        if (args.length < 5) {
           LOGGER.error(USAGE);
           return null;
         }
         Collection<InetAddress> hosts = new ArrayList<>();
-        for (int idx = 5; idx < args.length; ++idx) {
+        for (int idx = 4; idx < args.length; ++idx) {
           hosts.add(InetAddress.getByName(args[idx]));
         }
         return new SSHEnvironmentFactory(hosts,
-            args[3],
-            FileSystems.getDefault().getPath(args[4]),
+            args[2],
+            FileSystems.getDefault().getPath(args[3]),
             ENV_DIR_PREFIX,
             Executors.newCachedThreadPool());
       default:
         throw new UnsupportedOperationException(String.format("Unsupported environment type: %s",
-            args[0]));
+            args[1]));
     }
   }
 }

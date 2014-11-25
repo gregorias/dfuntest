@@ -119,6 +119,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
         mEnvironmentPreparator.clean(envs);
         hasPrepared = false;
       }
+      ++testIdx;
     }
 
     if (mShouldCleanEnvironments) {

@@ -70,4 +70,9 @@ public class ExampleDistributedPingTestScript implements TestScript<ExampleApp> 
     }
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "DistributedPingTestScript";
+  }
 }

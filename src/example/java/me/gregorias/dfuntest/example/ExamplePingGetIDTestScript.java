@@ -65,4 +65,9 @@ public class ExamplePingGetIDTestScript implements TestScript<ExampleApp> {
     }
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "PingGetIDTestScript";
+  }
 }

@@ -48,4 +48,9 @@ public class ExampleSanityTestScript implements TestScript<ExampleApp> {
     }
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "SanityTestScript";
+  }
 }
