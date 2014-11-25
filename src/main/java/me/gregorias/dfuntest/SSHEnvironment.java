@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -145,7 +145,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
         }
       } catch (IOException e) {
         // SFTP has failed (on some systems it may be just disabled) revert to mkdir.
-        List<String> command = new LinkedList<>();
+        List<String> command = new ArrayList<>();
         command.add("mkdir");
         command.add("-p");
         command.add(finalDirectoryPath);
@@ -162,7 +162,7 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
 
   @Override
   public void removeFile(String relPath) throws InterruptedException, IOException {
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("rm");
     command.add("-rf");
     command.add(relPath);

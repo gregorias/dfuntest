@@ -6,8 +6,8 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
@@ -81,7 +81,7 @@ public class LocalEnvironmentFactoryTest {
     LocalEnvironmentFactory factory = new LocalEnvironmentFactory(envCount,
         dirPrefix,
         mockFileUtils);
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment env = mock(Environment.class);
     when(env.getProperty(anyString())).thenThrow(NoSuchElementException.class);
     envs.add(env);

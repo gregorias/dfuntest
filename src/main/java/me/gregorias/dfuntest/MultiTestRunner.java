@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 /**
  * Basic implementation of TestRunner which runs sequentially multiple test script on given
@@ -112,7 +111,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
       }
 
 
-      Collection<AppT> apps = new LinkedList<>();
+      Collection<AppT> apps = new ArrayList<>();
       for (EnvironmentT env : envs) {
         apps.add(mApplicationFactory.newApp(env));
       }

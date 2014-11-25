@@ -2,13 +2,12 @@ package me.gregorias.dfuntest;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
-import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> 
   public Collection<Environment> create() throws IOException {
     LOGGER.info("create()");
 
-    Collection<Environment> environments = new LinkedList<>();
+    Collection<Environment> environments = new ArrayList<>();
     for (int envIdx = 0; envIdx < mEnvironmentCount; ++envIdx) {
       Path tempDirPath;
       tempDirPath = mFileUtils.createTempDirectory(mDirPrefix);

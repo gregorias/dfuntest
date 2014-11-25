@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import me.gregorias.dfuntest.util.FileUtils;
@@ -127,7 +127,7 @@ public class LocalEnvironmentTest {
     FileUtils mockFileUtils = mock(FileUtils.class);
     Environment localEnvironment = new LocalEnvironment(0, mEnvDir, mockFileUtils);
 
-    List<String> commands = new LinkedList<>();
+    List<String> commands = new ArrayList<>();
     commands.add("touch");
     commands.add(PREFIX);
 

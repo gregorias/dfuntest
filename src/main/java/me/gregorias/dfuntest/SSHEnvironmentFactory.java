@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -20,10 +19,6 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Milka
  */
 public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
-  public static final String XML_HOSTS_FIELD = "hosts";
-  public static final String XML_USERNAME_FIELD = "username";
-  public static final String XML_PRIVATE_KEY_FIELD = "private-key";
-  public static final String XML_REMOTE_DIR_FIELD = "remote-dir";
   private static final Logger LOGGER = LoggerFactory.getLogger(SSHEnvironmentFactory.class);
 
   private final List<InetAddress> mHosts;
@@ -59,7 +54,7 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
   public Collection<Environment> create() throws IOException {
     LOGGER.info("create()");
 
-    Collection<Environment> environments = new LinkedList<>();
+    Collection<Environment> environments = new ArrayList<>();
     for (int envIdx = 0; envIdx < mHosts.size(); ++envIdx) {
       LOGGER.trace("create(): Setting up environment for host: {}.", mHosts.get(envIdx).toString());
       final Environment env = new SSHEnvironment(envIdx,

@@ -16,13 +16,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import sun.org.mozilla.javascript.ast.Block;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -233,7 +232,7 @@ public class SSHEnvironmentTest {
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     Command mockCommand = mock(Command.class);
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommand(command);
@@ -249,7 +248,7 @@ public class SSHEnvironmentTest {
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     Command mockCommand = mock(Command.class);
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommand(command);
@@ -268,7 +267,7 @@ public class SSHEnvironmentTest {
     Command mockCommand = mock(Command.class);
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     doThrow(new ConnectionException("mock test")).when(mockCommand).join();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommand(command);
@@ -282,7 +281,7 @@ public class SSHEnvironmentTest {
     Command mockCommand = mock(Command.class);
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     doThrow(new IOException()).when(mMockSSHClient).disconnect();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommand(command);
@@ -295,7 +294,7 @@ public class SSHEnvironmentTest {
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
     doThrow(new IOException()).when(mMockSSHClient).disconnect();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommand(command);
@@ -312,7 +311,7 @@ public class SSHEnvironmentTest {
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
     doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
@@ -342,7 +341,7 @@ public class SSHEnvironmentTest {
     doThrow(ConnectionException.class).when(mockSession).close();
     BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
     doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
@@ -371,7 +370,7 @@ public class SSHEnvironmentTest {
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     doThrow(ConnectionException.class).when(mockSession).close();
     doThrow(ConnectionException.class).when(mockCommand).join();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
@@ -395,7 +394,7 @@ public class SSHEnvironmentTest {
     when(mockSession.exec(anyString())).thenReturn(mockCommand);
     BlockingQueue<Object> joinAnswers = new LinkedBlockingQueue<>();
     doAnswer(new BlockingAnswer(joinAnswers)).when(mockCommand).join();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     RemoteProcess process = mSSHEnv.runCommandAsynchronously(command);
@@ -416,7 +415,7 @@ public class SSHEnvironmentTest {
     when(mMockSSHClient.startSession()).thenReturn(mockSession);
     when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
     doThrow(new IOException()).when(mMockSSHClient).disconnect();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommandAsynchronously(command);
@@ -431,7 +430,7 @@ public class SSHEnvironmentTest {
     doThrow(IOException.class).when(mMockSSHClient).disconnect();
     when(mockSession.exec(anyString())).thenThrow(new ConnectionException("mock test"));
     doThrow(new IOException()).when(mMockSSHClient).disconnect();
-    List<String> command = new LinkedList<>();
+    List<String> command = new ArrayList<>();
     command.add("echo");
     command.add("hello");
     mSSHEnv.runCommandAsynchronously(command);

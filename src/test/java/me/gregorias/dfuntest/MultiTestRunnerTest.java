@@ -10,7 +10,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -54,7 +53,7 @@ public class MultiTestRunnerTest {
 
   @Test
   public void runShouldPrepareAndDestroyProperly() throws IOException {
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -85,7 +84,7 @@ public class MultiTestRunnerTest {
 
   @Test
   public void runShouldFailOnPrepareEnvironmentsFail() throws IOException {
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -107,7 +106,7 @@ public class MultiTestRunnerTest {
         mReportPath,
         mMockFileUtils);
 
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -140,7 +139,7 @@ public class MultiTestRunnerTest {
         mReportPath,
         mMockFileUtils);
 
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -176,7 +175,7 @@ public class MultiTestRunnerTest {
         mReportPath,
         mMockFileUtils);
 
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -211,7 +210,7 @@ public class MultiTestRunnerTest {
         mReportPath,
         mMockFileUtils);
 
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
@@ -248,7 +247,7 @@ public class MultiTestRunnerTest {
         mReportPath,
         mMockFileUtils);
 
-    Collection<Environment> envs = new LinkedList<>();
+    Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
     when(mMockEnvironmentFactory.create()).thenReturn(envs);
