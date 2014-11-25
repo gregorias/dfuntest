@@ -1,6 +1,5 @@
 package me.gregorias.dfuntest;
 
-import me.gregorias.dfuntest.util.FileUtils;
 import org.apache.commons.configuration.Configuration;
 
 import java.io.IOException;

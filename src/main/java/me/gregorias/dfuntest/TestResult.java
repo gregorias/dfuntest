@@ -6,7 +6,7 @@ public class TestResult {
 
   public enum Type {
     SUCCESS, FAILURE
-  };
+  }
 
   public TestResult(Type type, String description) {
     mType = type;
