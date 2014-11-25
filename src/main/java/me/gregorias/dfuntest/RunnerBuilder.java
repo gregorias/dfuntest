@@ -1,23 +1,28 @@
 package me.gregorias.dfuntest;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * Builder of SingleTestRunner instance.
+ * Builder of MultiTestRunner instance.
  */
 public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<EnvironmentT>> {
   private EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
   private EnvironmentPreparator<EnvironmentT> mEnvironmentPreparator;
   private ApplicationFactory<EnvironmentT, AppT> mApplicationFactory;
-  private TestScript<AppT> mTestScript;
+  private final Collection<TestScript<AppT>> mTestScripts = new ArrayList<>();
   private boolean mShouldPrepareEnvironments = true;
   private boolean mShouldCleanEnvironments = true;
   private Path mReportPath;
 
+  public RunnerBuilder<EnvironmentT, AppT> addTestScript(TestScript<AppT> testScript) {
+    mTestScripts.add(testScript);
+    return this;
+  }
+
   public TestRunner buildRunner() {
-    if (null == mTestScript
+    if (mTestScripts.size() == 0
         || null == mEnvironmentFactory
         || null == mEnvironmentPreparator
         || null == mApplicationFactory
@@ -25,8 +30,8 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
       throw new IllegalStateException("One of runner's dependencies was not set.");
     }
 
-    return new SingleTestRunner<EnvironmentT, AppT>(
-        mTestScript,
+    return new MultiTestRunner<>(
+        mTestScripts,
         mEnvironmentFactory,
         mEnvironmentPreparator,
         mApplicationFactory,
@@ -75,11 +80,6 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
    */
   public RunnerBuilder<EnvironmentT, AppT> setShouldCleanEnvironments(boolean should) {
     mShouldCleanEnvironments = should;
-    return this;
-  }
-
-  public RunnerBuilder<EnvironmentT, AppT> setTestScript(TestScript<AppT> testScript) {
-    mTestScript = testScript;
     return this;
   }
 }

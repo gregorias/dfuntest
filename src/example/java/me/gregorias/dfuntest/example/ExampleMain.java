@@ -73,13 +73,13 @@ public class ExampleMain {
     builder.setApplicationFactory(new ExampleAppFactory());
     switch (testType) {
       case "sanity":
-        builder.setTestScript(new ExampleSanityTestScript());
+        builder.addTestScript(new ExampleSanityTestScript());
         break;
       case "pinggetid":
-        builder.setTestScript(new ExamplePingGetIDTestScript());
+        builder.addTestScript(new ExamplePingGetIDTestScript());
         break;
       case "distributedping":
-        builder.setTestScript(new ExampleDistributedPingTestScript());
+        builder.addTestScript(new ExampleDistributedPingTestScript());
         break;
       default:
         LOGGER.error("USAGE");

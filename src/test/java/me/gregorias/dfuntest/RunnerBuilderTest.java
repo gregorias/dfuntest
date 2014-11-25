@@ -21,19 +21,19 @@ public class RunnerBuilderTest {
   private final Path mReportPath = FileSystems.getDefault().getPath("report");
 
   @Test
-  public void buildShouldCreateSingleTestRunner() {
+  public void buildShouldCreateMultiTestRunner() {
     RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setApplicationFactory(mMockApplicationFactory);
     builder.setReportPath(mReportPath);
-    builder.setTestScript(mMockTestScript);
+    builder.addTestScript(mMockTestScript);
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
     TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    assertTrue(runner instanceof MultiTestRunner);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -43,12 +43,11 @@ public class RunnerBuilderTest {
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setApplicationFactory(mMockApplicationFactory);
     builder.setReportPath(mReportPath);
-    builder.setTestScript(mMockTestScript);
+    builder.addTestScript(mMockTestScript);
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
-    TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    builder.buildRunner();
   }
 
   @Test(expected = IllegalStateException.class)
@@ -58,12 +57,11 @@ public class RunnerBuilderTest {
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setApplicationFactory(mMockApplicationFactory);
     builder.setReportPath(mReportPath);
-    builder.setTestScript(mMockTestScript);
+    builder.addTestScript(mMockTestScript);
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
-    TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    builder.buildRunner();
   }
 
   @Test(expected = IllegalStateException.class)
@@ -73,12 +71,11 @@ public class RunnerBuilderTest {
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setReportPath(mReportPath);
-    builder.setTestScript(mMockTestScript);
+    builder.addTestScript(mMockTestScript);
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
-    TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    builder.buildRunner();
   }
 
   @Test(expected = IllegalStateException.class)
@@ -88,12 +85,11 @@ public class RunnerBuilderTest {
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setApplicationFactory(mMockApplicationFactory);
-    builder.setTestScript(mMockTestScript);
+    builder.addTestScript(mMockTestScript);
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
-    TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    builder.buildRunner();
   }
 
   @Test(expected = IllegalStateException.class)
@@ -107,7 +103,6 @@ public class RunnerBuilderTest {
     builder.setShouldCleanEnvironments(false);
     builder.setShouldPrepareEnvironments(false);
 
-    TestRunner runner = builder.buildRunner();
-    assertTrue(runner instanceof SingleTestRunner);
+    builder.buildRunner();
   }
 }
