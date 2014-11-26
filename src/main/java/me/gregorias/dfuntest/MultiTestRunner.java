@@ -143,18 +143,32 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     return result;
   }
 
+  private void createParentDirectories(Path destPath) throws IOException {
+    Path parentPath = destPath.getParent();
+    if (parentPath == null) {
+      throw new IllegalArgumentException("Destination path does not specify a file.");
+    }
+    mFileUtils.createDirectories(parentPath);
+  }
+
+  private String getResultTypeString(TestResult.Type type) {
+    switch (type) {
+      case SUCCESS:
+        return "[SUCCESS]";
+      case FAILURE:
+      default:
+        return "[FAILURE]";
+    }
+  }
+
   private boolean saveResultToSummaryReportFile(TestResult scriptResult,
                                       TestScript<AppT> script,
                                       boolean shouldTruncate) {
-    String resultString;
-    if (scriptResult.getType() == TestResult.Type.FAILURE) {
-      resultString = "[FAILURE]";
-    } else {
-      resultString = "[SUCCESS]";
-    }
+    String resultString = getResultTypeString(scriptResult.getType());
 
     try {
       String content = resultString + " " + script.toString();
+      createParentDirectories(mSummaryReportPath);
       mFileUtils.write(mSummaryReportPath, content, shouldTruncate);
     } catch (IOException e) {
       LOGGER.warn("saveResultToReportFile(): Could not append to summary report file.", e);
@@ -164,16 +178,13 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
   }
 
   private void saveResultToScriptReportFile(TestResult scriptResult, Path testScriptReportPath) {
-    String resultString;
-    if (scriptResult.getType() == TestResult.Type.FAILURE) {
-      resultString = "[FAILURE]";
-    } else {
-      resultString = "[SUCCESS]";
-    }
+    String resultString = getResultTypeString(scriptResult.getType());
+    Path testScriptSummaryReportPath = testScriptReportPath.resolve(REPORT_FILENAME);
 
     try {
       String content = resultString + " " + scriptResult.getDescription();
-      mFileUtils.write(testScriptReportPath.resolve(REPORT_FILENAME), content, true);
+      createParentDirectories(testScriptSummaryReportPath);
+      mFileUtils.write(testScriptSummaryReportPath, content, true);
     } catch (IOException e) {
       LOGGER.warn("saveResultToReportFile(): Could not append to report file.", e);
     }
