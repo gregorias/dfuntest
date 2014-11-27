@@ -24,7 +24,7 @@ dfuntest is available in central Maven repository under following credentials:
 
     groupId: me.gregorias
     artifactId: dfuntest
-    version: 0.5.1
+    version: 0.5.2
 
 dfuntest architecture is based on easily implementable interfaces, some of which
 are provided by dfuntest and others need to be implemented to fit into
@@ -53,7 +53,7 @@ the following:
     cp ./build/libs/dfuntest*example.jar ./dfuntest-example.jar
     java -jar dfuntest-example.jar 9000 local 5
 
-This should end successfully and download logs to <code>report/</code>
+This should end successfully and download logs to <code>report_TIMESTAMP</code>
 directory.
 
 Advanced usage is explained in javadocs.
@@ -70,8 +70,8 @@ builds entire project, tests it and packages it.
     ./gradlew uploadArchives
 
 publishes artifacts to maven repository. Note that this requires a valid PGP key
-and credentials to `oss.sonatype.org`. Before uploading set proper version
-number in `build.gradle`.
+and credentials to oss.sonatype.org. Before uploading set proper version
+number in <code>build.gradle</code>.
 
 History
 =======
