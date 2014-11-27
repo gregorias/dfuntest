@@ -2,7 +2,6 @@ package me.gregorias.dfuntest.example;
 
 import me.gregorias.dfuntest.CommandException;
 import me.gregorias.dfuntest.TestResult;
-import me.gregorias.dfuntest.TestScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,24 +15,24 @@ import java.util.Set;
 /**
  * This test script tests whether all applications send their id to initial application.
  */
-public class ExampleDistributedPingTestScript implements TestScript<ExampleApp> {
+public class ExampleDistributedPingTestScript extends AbstractExampleTestScript {
   private static final Logger LOGGER = LoggerFactory.getLogger(
       ExampleDistributedPingTestScript.class);
 
   @Override
   public TestResult run(Collection<ExampleApp> apps) {
-    List<ExampleApp> startedApps = new ArrayList<>();
+    List<ExampleApp> appList = new ArrayList<>(apps);
     Set<Integer> expectedIDs = new HashSet<>();
     TestResult result = new TestResult(TestResult.Type.SUCCESS, "Test was successful.");
+
+    try {
+      startUpApps(apps);
+    } catch (CommandException | IOException e) {
+      return new TestResult(TestResult.Type.FAILURE, "An app could not be started.");
+    }
+
     for (ExampleApp app : apps) {
-      try {
-        app.startUp();
-        startedApps.add(app);
-        expectedIDs.add(app.getId());
-      } catch (CommandException | IOException e) {
-        LOGGER.error("run(): Test could not start an app.", e);
-        result = new TestResult(TestResult.Type.FAILURE, "An app could not be started.");
-      }
+      expectedIDs.add(app.getId());
     }
 
     try {
@@ -43,31 +42,22 @@ public class ExampleDistributedPingTestScript implements TestScript<ExampleApp> 
       Thread.currentThread().interrupt();
     }
 
-    if (result.getType() != TestResult.Type.FAILURE && startedApps.size() != 0) {
-      ExampleApp zeroApp = startedApps.get(0);
-      try {
-        Set<Integer> pingedIDs = new HashSet<>(zeroApp.getPingedIDs());
-        if (!pingedIDs.equals(expectedIDs)) {
-          LOGGER.error("run(): Returned IDs are not equal to the set of all application IDs.");
-          result = new TestResult(TestResult.Type.FAILURE, "An app could not be started.");
-        }
-      } catch (IOException e) {
-        LOGGER.error("run(): Could not get pinged IDs.", e);
-        result = new TestResult(TestResult.Type.FAILURE,
-            "Could not get pinged IDs due to IOException.");
+    ExampleApp zeroApp = appList.get(0);
+    try {
+      Set<Integer> pingedIDs = new HashSet<>(zeroApp.getPingedIDs());
+      if (!pingedIDs.equals(expectedIDs)) {
+        String errorMsg = String.format("Returned IDs are not equal to the set of all"
+            + " application IDs. Expected: %s, got: %s", expectedIDs, pingedIDs);
+        LOGGER.error("run(): " + errorMsg);
+        result = new TestResult(TestResult.Type.FAILURE, errorMsg);
       }
+    } catch (IOException e) {
+      String errorMsg = "Could not get pinged IDs due to IOException";
+      LOGGER.error("run(): " + errorMsg, e);
+      result = new TestResult(TestResult.Type.FAILURE, errorMsg);
     }
 
-    for (ExampleApp app : startedApps) {
-      try {
-        app.shutDown();
-      } catch (IOException | InterruptedException e) {
-        LOGGER.error("run(): Test could not shut down an app.", e);
-        if (result.getType() != TestResult.Type.SUCCESS) {
-          result = new TestResult(TestResult.Type.FAILURE, "An app could not be shut down.");
-        }
-      }
-    }
+    shutDownApps(apps);
     return result;
   }
 
