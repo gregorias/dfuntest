@@ -1,6 +1,7 @@
 package me.gregorias.dfuntest;
 
 import me.gregorias.dfuntest.util.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     LOGGER.info("run()");
 
     Collection<EnvironmentT> envs;
-    LOGGER.info("run(): Creating environments.");
+    LOGGER.debug("run(): Creating environments.");
     try {
       envs = mEnvironmentFactory.create();
     } catch (IOException e) {
@@ -91,26 +92,30 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     }
 
     boolean hasPrepared = false;
-    boolean hasWrittenToSummary = false;
-    TestResult result = new TestResult(TestResult.Type.SUCCESS, "Everything went ok.");
+    Collection<String> failedTests = new ArrayList<>();
+
     for (TestScript<AppT> script : mScripts) {
+      LOGGER.debug("run(): Preparing and running {}.", script);
       try {
         if (mShouldPrepareEnvironments && !hasPrepared) {
-          LOGGER.info("run(): Preparing environments.");
+          LOGGER.debug("run(): Preparing environments.");
           mEnvironmentPreparator.prepare(envs);
           hasPrepared = true;
         } else {
-          LOGGER.info("run(): Restoring environments.");
+          LOGGER.debug("run(): Restoring environments.");
           mEnvironmentPreparator.restore(envs);
         }
-        LOGGER.info("run(): Environments prepared: {}", envs.size());
+        LOGGER.debug("run(): Environments prepared or restored successfully.");
       } catch (IOException e) {
-        LOGGER.error("run(): Could not prepare environments for test {}.", script, e);
-        result = new TestResult(TestResult.Type.FAILURE, "Could not prepare environments.");
-        hasWrittenToSummary = saveResultToSummaryReportFile(result, script, !hasWrittenToSummary);
+        String errorMsg = String.format("Could not prepare environments for %s.",
+            script.toString());
+        LOGGER.error("run(): " + errorMsg, script, e);
+        saveResultToSummaryReportFile(
+            new TestResult(TestResult.Type.FAILURE, errorMsg),
+            script);
+        failedTests.add(script.toString());
         continue;
       }
-
 
       Collection<AppT> apps = new ArrayList<>();
       for (EnvironmentT env : envs) {
@@ -119,35 +124,40 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
 
       LOGGER.info("run(): Running test {}", script);
       TestResult scriptResult = script.run(apps);
-      LOGGER.info("run(): script {} has ended with result: {}", script, scriptResult.getType());
+      LOGGER.info("run(): Test {} has ended with {}", script, scriptResult.getType());
+
       if (scriptResult.getType() == TestResult.Type.FAILURE) {
-        result = new TestResult(TestResult.Type.FAILURE, String.format("%s has failed.",
-            script.toString()));
+        failedTests.add(script.toString());
       }
 
-      LOGGER.info("run(): Collecting output and log files.");
+      LOGGER.debug("run(): Collecting output and log files.");
       Path testReportPath = mReportPath.resolve(script.toString());
       mEnvironmentPreparator.collectOutputAndLogFiles(envs, testReportPath);
-      hasWrittenToSummary = saveResultToSummaryReportFile(result, script, !hasWrittenToSummary);
-      saveResultToScriptReportFile(result, testReportPath);
+      saveResultToSummaryReportFile(scriptResult, script);
+      saveResultToScriptReportFile(scriptResult, testReportPath);
       if (mShouldPrepareEnvironments && mShouldCleanEnvironments) {
+        LOGGER.debug("run(): Cleaning environments.");
         mEnvironmentPreparator.clean(envs);
         hasPrepared = false;
       }
     }
 
     if (mShouldCleanEnvironments) {
+      LOGGER.debug("run(): Destroying environments.");
       mEnvironmentFactory.destroy(envs);
     }
 
-    return result;
+    if (failedTests.isEmpty()) {
+      return new TestResult(TestResult.Type.SUCCESS, "TestRunner has run all tests successfully.");
+    } else {
+      return new TestResult(TestResult.Type.FAILURE,
+          "Some tests have failed: " + StringUtils.join(failedTests, " "));
+    }
   }
 
   private void createParentDirectories(Path destPath) throws IOException {
     Path parentPath = destPath.getParent();
-    if (parentPath == null) {
-      throw new IllegalArgumentException("Destination path does not specify a file.");
-    }
+    assert parentPath != null : "Destination path pointed to current directory.";
     mFileUtils.createDirectories(parentPath);
   }
 
@@ -162,14 +172,13 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
   }
 
   private boolean saveResultToSummaryReportFile(TestResult scriptResult,
-                                      TestScript<AppT> script,
-                                      boolean shouldTruncate) {
+                                      TestScript<AppT> script) {
     String resultString = getResultTypeString(scriptResult.getType());
 
     try {
       String content = resultString + " " + script.toString();
       createParentDirectories(mSummaryReportPath);
-      mFileUtils.write(mSummaryReportPath, content, shouldTruncate);
+      mFileUtils.write(mSummaryReportPath, content);
     } catch (IOException e) {
       LOGGER.warn("saveResultToReportFile(): Could not append to summary report file.", e);
       return false;
@@ -184,7 +193,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     try {
       String content = resultString + " " + scriptResult.getDescription();
       createParentDirectories(testScriptSummaryReportPath);
-      mFileUtils.write(testScriptSummaryReportPath, content, true);
+      mFileUtils.write(testScriptSummaryReportPath, content);
     } catch (IOException e) {
       LOGGER.warn("saveResultToReportFile(): Could not append to report file.", e);
     }

@@ -63,17 +63,12 @@ public class FileUtilsImpl implements FileUtils {
   }
 
   @Override
-  public void write(Path path, String content, boolean shouldTruncate) throws IOException {
+  public void write(Path path, String content) throws IOException {
     StandardOpenOption[] options = new StandardOpenOption[3];
-
-    if (shouldTruncate) {
-      options[2] = StandardOpenOption.TRUNCATE_EXISTING;
-    } else {
-      options[2] = StandardOpenOption.APPEND;
-    }
 
     options[0] = StandardOpenOption.CREATE;
     options[1] = StandardOpenOption.WRITE;
+    options[2] = StandardOpenOption.APPEND;
 
     Collection<String> lines = new ArrayList<>();
     lines.add(content);

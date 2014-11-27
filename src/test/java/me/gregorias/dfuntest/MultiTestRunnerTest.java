@@ -231,7 +231,7 @@ public class MultiTestRunnerTest {
   }
 
   @Test
-  public void runShouldCreateRaportsForEveryTestScriptAndSummary() throws IOException {
+  public void runShouldCreateReportsForEveryTestScriptAndSummary() throws IOException {
     String firstTestScriptName = "FirstTestScript";
     String secondTestScriptName = "SecondTestScript";
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
@@ -261,15 +261,15 @@ public class MultiTestRunnerTest {
     multiTestRunner.run();
 
     Path expectedSummaryReportPath = mReportPath.resolve(MultiTestRunner.REPORT_FILENAME);
-    verify(mMockFileUtils).write(eq(expectedSummaryReportPath), anyString(), eq(true));
+    verify(mMockFileUtils, times(2)).write(eq(expectedSummaryReportPath), anyString());
 
     Path expectedFirstReportPath = mReportPath.resolve(firstTestScriptName).resolve(
         MultiTestRunner.REPORT_FILENAME);
-    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString(), eq(true));
+    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString());
 
     Path expectedSecondReportPath = mReportPath.resolve(firstTestScriptName).resolve(
         MultiTestRunner.REPORT_FILENAME);
-    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString());
   }
 
   @Test
@@ -306,12 +306,12 @@ public class MultiTestRunnerTest {
         MultiTestRunner.REPORT_FILENAME);
 
     doThrow(IOException.class).when(mMockFileUtils).write(
-        eq(expectedSummaryReportPath), anyString(), eq(true));
+        eq(expectedSummaryReportPath), anyString());
 
     multiTestRunner.run();
 
-    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString(), eq(true));
-    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
+    verify(mMockFileUtils).write(eq(expectedFirstReportPath), anyString());
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString());
   }
 
   @Test
@@ -348,11 +348,11 @@ public class MultiTestRunnerTest {
         MultiTestRunner.REPORT_FILENAME);
 
     doThrow(IOException.class).when(mMockFileUtils).write(
-        eq(expectedFirstReportPath), anyString(), eq(true));
+        eq(expectedFirstReportPath), anyString());
 
     multiTestRunner.run();
 
-    verify(mMockFileUtils).write(eq(expectedSummaryReportPath), anyString(), eq(true));
-    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString(), eq(true));
+    verify(mMockFileUtils, times(2)).write(eq(expectedSummaryReportPath), anyString());
+    verify(mMockFileUtils).write(eq(expectedSecondReportPath), anyString());
   }
 }

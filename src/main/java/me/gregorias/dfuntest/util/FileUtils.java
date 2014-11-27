@@ -82,7 +82,6 @@ public interface FileUtils {
    *
    * @param path Path of file to write to.
    * @param content String to be written to file.
-   * @param shouldTruncate Whether file should be truncated on write.
    */
-  void write(Path path, String content, boolean shouldTruncate) throws IOException;
+  void write(Path path, String content) throws IOException;
 }

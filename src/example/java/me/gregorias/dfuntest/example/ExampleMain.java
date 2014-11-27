@@ -14,8 +14,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.concurrent.Executors;
 
 /**
@@ -44,7 +46,8 @@ public class ExampleMain {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExampleMain.class);
   private static final String USAGE = "Usage: ExampleMain INITIAL_PORT "
       + "(local ENV_COUNT | ssh USERNAME PRIVATE_KEY_PATH HOSTS...)";
-  private static final Path REPORT_PATH = FileSystems.getDefault().getPath("report");
+  private static final String REPORT_PATH_PREFIX = "report_";
+
   private static final String ENV_DIR_PREFIX = "Example";
 
   public static void main(String[] args) {
@@ -76,7 +79,7 @@ public class ExampleMain {
 
     builder.setShouldPrepareEnvironments(true);
     builder.setShouldCleanEnvironments(true);
-    builder.setReportPath(REPORT_PATH);
+    builder.setReportPath(calculateReportPath());
 
     TestRunner testRunner = builder.buildRunner();
     TestResult result = testRunner.run();
@@ -93,6 +96,14 @@ public class ExampleMain {
     LOGGER.info("main(): Test has ended {} with description: {}", resultStr,
         result.getDescription());
     System.exit(status);
+  }
+
+  private static String calculateCurrentTimeStamp() {
+    return new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date());
+  }
+
+  private static Path calculateReportPath() {
+    return FileSystems.getDefault().getPath(REPORT_PATH_PREFIX + calculateCurrentTimeStamp());
   }
 
   private static EnvironmentFactory<Environment> initializeEnvironmentFactory(String[] args)
