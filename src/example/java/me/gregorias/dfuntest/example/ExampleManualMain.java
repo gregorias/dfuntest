@@ -3,15 +3,13 @@ package me.gregorias.dfuntest.example;
 import me.gregorias.dfuntest.Environment;
 import me.gregorias.dfuntest.EnvironmentFactory;
 import me.gregorias.dfuntest.LocalEnvironmentFactory;
-import me.gregorias.dfuntest.RunnerBuilder;
+import me.gregorias.dfuntest.testrunnerbuilders.ManualTestRunnerBuilder;
 import me.gregorias.dfuntest.SSHEnvironmentFactory;
 import me.gregorias.dfuntest.TestResult;
 import me.gregorias.dfuntest.TestRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -21,30 +19,41 @@ import java.util.Date;
 import java.util.concurrent.Executors;
 
 /**
+ * <p>
  * Main class for running dfuntest for PingApplication. This class shows how a typical preparation
- * of dfuntest should look and involves:
- * parsing input (here through command line arguments, but can also be done through for example xml
- * config file);
- * depending on input settings preparing appriopiate EnvironmentFactory, EnvironmentPreparator,
- * ApplicationFactory and choosing TestScript;
- * running the TestRunner.
+ * of dfuntest could look and involves:
+ * <ul>
+ * <li>parsing input (here through command line arguments, but can also be done through for example
+ * xml config file)</li>
+ * <li>depending on input settings preparing appriopiate EnvironmentFactory, EnvironmentPreparator,
+ * ApplicationFactory and choosing TestScript;</li>
+ * <li>running the TestRunner.</li>
+ * </ul>
+ * </p>
  *
+ * <p>
  * The main should be run with following arguments:
  * INITIAL_PORT - initial port number assigned to first application,
  * Either:
- *   local ENV_COUNT - run tests locally with ENV_COUNT environments
- *   ssh USERNAME PRIVATE_KEY_PATH HOSTS... - run tests on given ssh hosts which are accessible for
- *     USERNAME user with given private key
+ * <ul>
+ *   <li>local ENV_COUNT - run tests locally with ENV_COUNT environments</li>
+ *   <li>ssh USERNAME PRIVATE_KEY_PATH HOSTS... - run tests on given ssh hosts which are accessible for
+ *     USERNAME user with given private key</li>
+ * </ul>
+ * </p>
  *
+ * <p>
  * This Main assumes that in current working directory there is dfuntest-example.jar with
  * dfuntest.example package and lib directory with all necessary dependencies.
+ * </p>
  *
- * Run "./gradlew build cAD" and copy build/libs/dfuntest.jar to lib/ to ensure all
- * dependencies are in place.
+ * <p>
+ * Run "./gradlew cERD" to ensure all dependencies are in place.
+ * </p>
  */
-public class ExampleMain {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExampleMain.class);
-  private static final String USAGE = "Usage: ExampleMain INITIAL_PORT "
+public class ExampleManualMain {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExampleManualMain.class);
+  private static final String USAGE = "Usage: ExampleManualMain INITIAL_PORT "
       + "(local ENV_COUNT | ssh USERNAME PRIVATE_KEY_PATH HOSTS...)";
   private static final String REPORT_PATH_PREFIX = "report_";
 
@@ -58,16 +67,11 @@ public class ExampleMain {
 
     int initialPort = Integer.parseInt(args[0]);
     EnvironmentFactory<Environment> environmentFactory = null;
-    try {
-      environmentFactory = initializeEnvironmentFactory(args);
-    } catch (UnknownHostException e) {
-      LOGGER.error("main(): Could not resolve a host address.", e);
-      System.exit(1);
-    }
+    environmentFactory = initializeEnvironmentFactory(args);
     if (environmentFactory == null) {
       System.exit(1);
     }
-    RunnerBuilder<Environment, ExampleApp> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, ExampleApp> builder = new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(environmentFactory);
     builder.setEnvironmentPreparator(new ExampleEnvironmentPreparator(initialPort));
@@ -106,8 +110,7 @@ public class ExampleMain {
     return FileSystems.getDefault().getPath(REPORT_PATH_PREFIX + calculateCurrentTimeStamp());
   }
 
-  private static EnvironmentFactory<Environment> initializeEnvironmentFactory(String[] args)
-      throws UnknownHostException {
+  private static EnvironmentFactory<Environment> initializeEnvironmentFactory(String[] args) {
     switch (args[1]) {
       case "local":
         int envCount = Integer.parseInt(args[2]);
@@ -117,9 +120,9 @@ public class ExampleMain {
           LOGGER.error(USAGE);
           return null;
         }
-        Collection<InetAddress> hosts = new ArrayList<>();
+        Collection<String> hosts = new ArrayList<>();
         for (int idx = 4; idx < args.length; ++idx) {
-          hosts.add(InetAddress.getByName(args[idx]));
+          hosts.add(args[idx]);
         }
         return new SSHEnvironmentFactory(hosts,
             args[2],

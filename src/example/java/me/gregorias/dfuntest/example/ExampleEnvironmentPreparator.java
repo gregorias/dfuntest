@@ -1,5 +1,7 @@
 package me.gregorias.dfuntest.example;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import me.gregorias.dfuntest.Environment;
 import me.gregorias.dfuntest.EnvironmentPreparator;
 import org.slf4j.Logger;
@@ -27,12 +29,15 @@ import java.util.LinkedList;
  * @author Grzegorz Milka
  */
 public class ExampleEnvironmentPreparator implements EnvironmentPreparator<Environment> {
+  public static final String INITIAL_PORT_ARGUMENT_NAME =
+      "ExampleEnvironmentPreparator.initialPort";
   private static final Logger LOGGER = LoggerFactory.getLogger(ExampleEnvironmentPreparator.class);
   private static final Path LIBS_PATH = FileSystems.getDefault().getPath("lib");
   private static final Path JAR_PATH = FileSystems.getDefault().getPath("dfuntest-example.jar");
   private final int mInitialPort;
 
-  public ExampleEnvironmentPreparator(int initialPort) {
+  @Inject
+  public ExampleEnvironmentPreparator(@Named(INITIAL_PORT_ARGUMENT_NAME) int initialPort) {
     mInitialPort = initialPort;
   }
 

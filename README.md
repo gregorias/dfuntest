@@ -51,7 +51,8 @@ the following:
 
     ./gradlew build buildExample copyExampleRuntimeDependencies
     cp ./build/libs/dfuntest*example.jar ./dfuntest-example.jar
-    java -jar dfuntest-example.jar 9000 local 5
+    java -jar dfuntest-example.jar --env-factory local --config-file \
+      resources/config/exampledfuntest.xml
 
 This should end successfully and download logs to <code>report_TIMESTAMP</code>
 directory.

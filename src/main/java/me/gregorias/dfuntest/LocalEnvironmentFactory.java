@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.slf4j.Logger;
@@ -17,8 +19,10 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Milka
  */
 public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> {
+  public static final String ENV_COUNT_ARGUMENT_NAME = "LocalEnvironmentFactory.environmentCount";
+  public static final String DIR_PREFIX_ARGUMENT_NAME = "LocalEnvironmentFactory.dirPrefix";
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalEnvironmentFactory.class);
-  private static final String ENV_CONFIG_ROOT_DIR = "local-environment-factory-root-dir";
+  private static final String ENV_CONFIG_ROOT_DIR = "localEnvironmentFactoryRootDir";
 
   private final int mEnvironmentCount;
   private final String mDirPrefix;
@@ -38,8 +42,10 @@ public class LocalEnvironmentFactory implements EnvironmentFactory<Environment> 
     mFileUtils = fileUtils;
   }
 
-  public LocalEnvironmentFactory(int environmentCount,
-                                 String dirPrefix) {
+  @Inject
+  public LocalEnvironmentFactory(
+      @Named(ENV_COUNT_ARGUMENT_NAME) int environmentCount,
+      @Named(DIR_PREFIX_ARGUMENT_NAME) String dirPrefix) {
     this(environmentCount, dirPrefix, FileUtilsImpl.getFileUtilsImpl());
   }
 

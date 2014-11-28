@@ -3,7 +3,6 @@ package me.gregorias.dfuntest;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -22,9 +21,9 @@ public class SSHEnvironmentFactoryTest {
 
   @Test
   public void createShouldCreateEnvironmentForEveryHost() throws IOException {
-    Collection<InetAddress> hosts = new ArrayList<>();
-    hosts.add(InetAddress.getByName("localhost"));
-    hosts.add(InetAddress.getByName("127.0.0.1"));
+    Collection<String> hosts = new ArrayList<>();
+    hosts.add("localhost");
+    hosts.add("127.0.0.1");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(
         hosts,
         mUsername,
@@ -46,7 +45,7 @@ public class SSHEnvironmentFactoryTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void createShouldThrowExceptionOnEmptyHostsList() throws IOException {
-    Collection<InetAddress> hosts = new ArrayList<>();
+    Collection<String> hosts = new ArrayList<>();
     new SSHEnvironmentFactory(
         hosts,
         mUsername,
@@ -57,9 +56,9 @@ public class SSHEnvironmentFactoryTest {
 
   @Test
   public void destroyShouldNotThrowException() throws IOException {
-    Collection<InetAddress> hosts = new ArrayList<>();
-    hosts.add(InetAddress.getByName("localhost"));
-    hosts.add(InetAddress.getByName("127.0.0.1"));
+    Collection<String> hosts = new ArrayList<>();
+    hosts.add("localhost");
+    hosts.add("127.0.0.1");
     SSHEnvironmentFactory sshEnvironmentFactory = new SSHEnvironmentFactory(
         hosts,
         mUsername,

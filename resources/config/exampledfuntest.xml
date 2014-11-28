@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exampledfuntest>
+  <LocalEnvironmentFactory>
+    <environmentCount>
+      5
+    </environmentCount>
+  </LocalEnvironmentFactory>
+  <SSHEnvironmentFactory>
+    <hosts>
+      <!-- Provide list of SSH accessible hosts to test separated by a comma.-->
+      localhost
+    </hosts>
+    <username>
+      YOUR_USERNAME_TO_HOSTS
+    </username>
+    <privateKeyPath>
+      <!-- Provide path to ssh private key, it has to be accessible -->
+      PATH_TO_SSH_KEY
+    </privateKeyPath>
+  </SSHEnvironmentFactory>
+  <ExampleEnvironmentPreparator>
+    <initialPort>
+      9000
+    </initialPort>
+  </ExampleEnvironmentPreparator>
+  <MultiTestRunner>
+    <shouldPrepareEnvironments>
+      true
+    </shouldPrepareEnvironments>
+    <shouldCleanEnvironments>
+      true
+    </shouldCleanEnvironments>
+  </MultiTestRunner>
+</exampledfuntest>

@@ -37,6 +37,8 @@ repositories {
 }
 
 dependencies {
+  compile group: 'com.google.inject', name: 'guice', version: '4.0-beta5'
+  compile group: 'com.google.inject.extensions', name: 'guice-multibindings', version: '4.0-beta5'
   compile group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
   compile group: 'commons-io', name: 'commons-io', version: '2.4'
   compile group: 'net.schmizz', name: 'sshj', version: '0.10.0'
@@ -44,8 +46,16 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.11'
   testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.8'
   exampleCompile files(jar.archivePath)
+  exampleCompile group: 'commons-cli', name: 'commons-cli', version: '1.2'
   runtime group: 'com.jcraft', name: 'jzlib', version: '1.1.3'
   exampleRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.7'
+  exampleRuntime group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+}
+
+idea {
+  module {
+    scopes.COMPILE.plus += [configurations.compile, configurations.exampleCompile]
+  }
 }
 
 compileJava {
@@ -94,7 +104,7 @@ task exampleJar(type: Jar) {
   classifier = 'example'
   from sourceSets.example.output
   manifest {
-    attributes 'Main-Class': 'me.gregorias.dfuntest.example.ExampleMain',
+    attributes 'Main-Class': 'me.gregorias.dfuntest.example.ExampleGuiceMain',
                'Class-Path': generateClassPath(configurations.exampleRuntime,
                  DEPENDENCY_LIB_DIRECTORY)
   }

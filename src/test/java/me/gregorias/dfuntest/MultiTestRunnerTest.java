@@ -10,6 +10,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -127,7 +129,7 @@ public class MultiTestRunnerTest {
   @Test
   public void runShouldFailOnMultipleTestScriptFailButRunAllTests() throws IOException {
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
@@ -163,7 +165,7 @@ public class MultiTestRunnerTest {
   @Test
   public void runShouldOnlyCallPrepareOnceIfCleanIsNotSet() throws IOException {
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
@@ -198,7 +200,7 @@ public class MultiTestRunnerTest {
   @Test
   public void runShouldOnlyCallPrepareTwice() throws IOException {
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
@@ -235,7 +237,7 @@ public class MultiTestRunnerTest {
     String firstTestScriptName = "FirstTestScript";
     String secondTestScriptName = "SecondTestScript";
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
@@ -277,7 +279,7 @@ public class MultiTestRunnerTest {
     String firstTestScriptName = "FirstTestScript";
     String secondTestScriptName = "SecondTestScript";
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,
@@ -319,7 +321,7 @@ public class MultiTestRunnerTest {
     String firstTestScriptName = "FirstTestScript";
     String secondTestScriptName = "SecondTestScript";
     TestScript<App<Environment>> secondMockTestScript = mock(TestScript.class);
-    Collection<TestScript<App<Environment>>> scripts = new ArrayList<>();
+    Set<TestScript<App<Environment>>> scripts = new HashSet<>();
     scripts.add(mMockTestScript);
     scripts.add(secondMockTestScript);
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(scripts,

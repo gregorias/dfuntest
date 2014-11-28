@@ -1,24 +1,33 @@
-package me.gregorias.dfuntest;
+package me.gregorias.dfuntest.testrunnerbuilders;
 
+import me.gregorias.dfuntest.App;
+import me.gregorias.dfuntest.ApplicationFactory;
+import me.gregorias.dfuntest.Environment;
+import me.gregorias.dfuntest.EnvironmentFactory;
+import me.gregorias.dfuntest.EnvironmentPreparator;
+import me.gregorias.dfuntest.MultiTestRunner;
+import me.gregorias.dfuntest.TestRunner;
+import me.gregorias.dfuntest.TestScript;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Builder of MultiTestRunner instance.
  */
-public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<EnvironmentT>> {
+public class ManualTestRunnerBuilder<EnvironmentT extends Environment,
+    AppT extends App<EnvironmentT>> {
   private EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
   private EnvironmentPreparator<EnvironmentT> mEnvironmentPreparator;
   private ApplicationFactory<EnvironmentT, AppT> mApplicationFactory;
-  private final Collection<TestScript<AppT>> mTestScripts = new ArrayList<>();
+  private final Set<TestScript<AppT>> mTestScripts = new HashSet<>();
   private boolean mShouldPrepareEnvironments = true;
   private boolean mShouldCleanEnvironments = true;
   private Path mReportPath;
 
-  public RunnerBuilder<EnvironmentT, AppT> addTestScript(TestScript<AppT> testScript) {
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> addTestScript(TestScript<AppT> testScript) {
     mTestScripts.add(testScript);
     return this;
   }
@@ -43,25 +52,25 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
         FileUtilsImpl.getFileUtilsImpl());
   }
 
-  public RunnerBuilder<EnvironmentT, AppT> setApplicationFactory(
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setApplicationFactory(
       ApplicationFactory<EnvironmentT, AppT> applicationFactory) {
     mApplicationFactory = applicationFactory;
     return this;
   }
 
-  public RunnerBuilder<EnvironmentT, AppT> setEnvironmentFactory(
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setEnvironmentFactory(
       EnvironmentFactory<EnvironmentT> environmentFactory) {
     mEnvironmentFactory = environmentFactory;
     return this;
   }
 
-  public RunnerBuilder<EnvironmentT, AppT> setEnvironmentPreparator(
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setEnvironmentPreparator(
       EnvironmentPreparator<EnvironmentT> environmentPreparator) {
     mEnvironmentPreparator = environmentPreparator;
     return this;
   }
 
-  public RunnerBuilder<EnvironmentT, AppT> setReportPath(Path reportPath) {
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setReportPath(Path reportPath) {
     mReportPath = reportPath;
     return this;
   }
@@ -71,7 +80,7 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
    * @param should should runner prepare environments
    * @return this
    */
-  public RunnerBuilder<EnvironmentT, AppT> setShouldPrepareEnvironments(boolean should) {
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setShouldPrepareEnvironments(boolean should) {
     mShouldPrepareEnvironments = should;
     return this;
   }
@@ -81,7 +90,7 @@ public class RunnerBuilder<EnvironmentT extends Environment, AppT extends App<En
    * @param should should runner clean environments
    * @return this
    */
-  public RunnerBuilder<EnvironmentT, AppT> setShouldCleanEnvironments(boolean should) {
+  public ManualTestRunnerBuilder<EnvironmentT, AppT> setShouldCleanEnvironments(boolean should) {
     mShouldCleanEnvironments = should;
     return this;
   }

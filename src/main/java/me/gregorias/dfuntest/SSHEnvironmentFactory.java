@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 import me.gregorias.dfuntest.util.SSHClientFactory;
 import org.slf4j.Logger;
@@ -19,9 +21,14 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Milka
  */
 public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
+  public static final String HOSTS_ARGUMENT_NAME = "SSHEnvironmentFactory.hosts";
+  public static final String USERNAME_ARGUMENT_NAME = "SSHEnvironmentFactory.username";
+  public static final String PRIVATE_KEY_PATH = "SSHEnvironmentFactory.privateKeyPath";
+  public static final String REMOTE_DIR_ARGUMENT_NAME = "SSHEnvironmentFactory.remoteDir";
+  public static final String EXECUTOR_ARGUMENT_NAME = "SSHEnvironmentFactory.executor";
   private static final Logger LOGGER = LoggerFactory.getLogger(SSHEnvironmentFactory.class);
 
-  private final List<InetAddress> mHosts;
+  private final List<String> mHostnames;
   private final String mUsername;
   private final Path mPrivateKeyPath;
   private final String mRemoteDir;
@@ -34,16 +41,17 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
    * @param remoteDir name of remote directory to put files to
    * @param executor executor for ssh background execution of ssh tasks
    */
+  @Inject
   public SSHEnvironmentFactory(
-      Collection<InetAddress> hosts,
-      String username,
-      Path privateKeyPath,
-      String remoteDir,
-      Executor executor) {
+      @Named(HOSTS_ARGUMENT_NAME) Collection<String> hosts,
+      @Named(USERNAME_ARGUMENT_NAME) String username,
+      @Named(PRIVATE_KEY_PATH) Path privateKeyPath,
+      @Named(REMOTE_DIR_ARGUMENT_NAME) String remoteDir,
+      @Named(EXECUTOR_ARGUMENT_NAME) Executor executor) {
     if (hosts.size() == 0) {
       throw new IllegalArgumentException("Hosts collection is empty.");
     }
-    mHosts = new ArrayList<>(hosts);
+    mHostnames = new ArrayList<>(hosts);
     mUsername = username;
     mPrivateKeyPath = privateKeyPath;
     mRemoteDir = remoteDir;
@@ -55,12 +63,14 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
     LOGGER.info("create()");
 
     Collection<Environment> environments = new ArrayList<>();
-    for (int envIdx = 0; envIdx < mHosts.size(); ++envIdx) {
-      LOGGER.trace("create(): Setting up environment for host: {}.", mHosts.get(envIdx).toString());
+    for (int envIdx = 0; envIdx < mHostnames.size(); ++envIdx) {
+      LOGGER.trace("create(): Setting up environment for host: {}.", mHostnames.get(envIdx));
+
+      InetAddress hostInetAddress = InetAddress.getByName(mHostnames.get(envIdx));
       final Environment env = new SSHEnvironment(envIdx,
           mUsername,
           mPrivateKeyPath,
-          mHosts.get(envIdx),
+          hostInetAddress,
           mRemoteDir,
           mExecutor,
           SSHClientFactory.getSSHClientFactory(),

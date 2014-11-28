@@ -1,21 +1,28 @@
 package me.gregorias.dfuntest;
 
+import com.google.inject.Inject;
 import me.gregorias.dfuntest.util.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 /**
+ * <p>
  * Basic implementation of TestRunner which runs sequentially multiple test script on given
  * environments and apps.
+ * </p>
  *
+ * <p>
  * It runs preparation methods on environments if shouldPrepareEnvironments flag is set and the
  * environment either hasn't been prepared or has been cleaned.
+ * </p>
  *
  * @author Grzegorz Milka
  *
@@ -25,6 +32,13 @@ import java.util.Collection;
 public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<EnvironmentT>>
     implements TestRunner {
   public static final String REPORT_FILENAME = "report.txt";
+  public static final String SCRIPTS_ARGUMENT_NAME = "MultiTestRunner.scripts";
+  public static final String SHOULD_PREPARE_ARGUMENT_NAME =
+      "MultiTestRunner.shouldPrepareEnvironments";
+  public static final String SHOULD_CLEAN_ARGUMENT_NAME =
+      "MultiTestRunner.shouldCleanEnvironments";
+  public static final String REPORT_PATH_ARGUMENT_NAME =
+      "MultiTestRunner.reportPath";
   private static final Logger LOGGER = LoggerFactory.getLogger(MultiTestRunner.class);
   private final Collection<TestScript<AppT>> mScripts;
   private final EnvironmentFactory<EnvironmentT> mEnvironmentFactory;
@@ -58,12 +72,16 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
     mSummaryReportPath = mReportPath.resolve(REPORT_FILENAME);
   }
 
-  public MultiTestRunner(Collection<TestScript<AppT>> scripts,
+  @Inject
+  public MultiTestRunner(@Named(SCRIPTS_ARGUMENT_NAME) Set<TestScript<AppT>> scripts,
                          EnvironmentFactory<EnvironmentT> environmentFactory,
                          EnvironmentPreparator<EnvironmentT> environmentPreparator,
                          ApplicationFactory<EnvironmentT, AppT> applicationFactory,
+                         @Named(SHOULD_PREPARE_ARGUMENT_NAME)
                          boolean shouldPrepareEnvironments,
+                         @Named(SHOULD_CLEAN_ARGUMENT_NAME)
                          boolean shouldCleanEnvironments,
+                         @Named(REPORT_PATH_ARGUMENT_NAME)
                          Path reportPath,
                          FileUtils fileUtils) {
     mScripts = scripts;

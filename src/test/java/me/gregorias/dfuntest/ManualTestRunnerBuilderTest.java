@@ -1,5 +1,6 @@
 package me.gregorias.dfuntest;
 
+import me.gregorias.dfuntest.testrunnerbuilders.ManualTestRunnerBuilder;
 import org.junit.Test;
 
 import java.nio.file.FileSystems;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("unchecked")
-public class RunnerBuilderTest {
+public class ManualTestRunnerBuilderTest {
   private final EnvironmentFactory<Environment> mMockEnvironmentFactory = mock(
       EnvironmentFactory.class);
   private final EnvironmentPreparator<Environment> mMockEnvironmentPreparator = mock(
@@ -22,9 +23,11 @@ public class RunnerBuilderTest {
 
   @Test
   public void buildShouldCreateMultiTestRunner() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
+
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setApplicationFactory(mMockApplicationFactory);
     builder.setReportPath(mReportPath);
@@ -38,7 +41,8 @@ public class RunnerBuilderTest {
 
   @Test(expected = IllegalStateException.class)
   public void buildShouldThrowErrorOnLackOfEnvironmentFactory() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
     builder.setApplicationFactory(mMockApplicationFactory);
@@ -52,7 +56,8 @@ public class RunnerBuilderTest {
 
   @Test(expected = IllegalStateException.class)
   public void buildShouldThrowErrorOnLackOfEnvironmentPreparator() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setApplicationFactory(mMockApplicationFactory);
@@ -66,7 +71,8 @@ public class RunnerBuilderTest {
 
   @Test(expected = IllegalStateException.class)
   public void buildShouldThrowErrorOnLackOfApplicationFactory() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
@@ -80,7 +86,8 @@ public class RunnerBuilderTest {
 
   @Test(expected = IllegalStateException.class)
   public void buildShouldThrowErrorOnLackOfReportPath() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
@@ -94,7 +101,8 @@ public class RunnerBuilderTest {
 
   @Test(expected = IllegalStateException.class)
   public void buildShouldThrowErrorOnLackOfTestScript() {
-    RunnerBuilder<Environment, App<Environment>> builder = new RunnerBuilder<>();
+    ManualTestRunnerBuilder<Environment, App<Environment>> builder =
+        new ManualTestRunnerBuilder<>();
 
     builder.setEnvironmentFactory(mMockEnvironmentFactory);
     builder.setEnvironmentPreparator(mMockEnvironmentPreparator);
