@@ -73,7 +73,7 @@ compileExampleJava {
   targetCompatibility = '1.7'
 }
 
-task exampleJavadoc(type: Javadoc) {
+task javadocExample(type: Javadoc) {
   classpath = configurations.exampleCompile
   destinationDir = new File("${project.docsDir}/javadocExample")
   source sourceSets.example.allJava;
@@ -90,17 +90,17 @@ jacocoTestReport {
   }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task jarJavadoc(type: Jar, dependsOn: javadoc) {
   classifier = 'javadoc'
   from javadoc.destinationDir
 }
 
-task sourceJar(type: Jar) {
+task jarSource(type: Jar) {
   classifier = 'sources'
   from sourceSets.main.allSource
 }
 
-task exampleJar(type: Jar) {
+task jarExample(type: Jar) {
   classifier = 'example'
   from sourceSets.example.output
   manifest {
@@ -110,22 +110,22 @@ task exampleJar(type: Jar) {
   }
 }
 
-task exampleJavadocJar(type: Jar, dependsOn: exampleJavadoc) {
-  classifier = 'exampleJavadoc'
-  from exampleJavadoc.destinationDir
+task jarExampleJavadoc(type: Jar, dependsOn: javadocExample) {
+  classifier = 'javadocExample'
+  from javadocExample.destinationDir
 }
 
-task exampleSourceJar(type: Jar) {
+task jarExampleSource(type: Jar) {
   classifier = 'exampleSources'
   from sourceSets.example.allSource
 }
 
 artifacts {
-  archives sourceJar
-  archives javadocJar
-  example exampleJar
-  example exampleJavadocJar
-  example exampleSourceJar
+  archives jarSource
+  archives jarJavadoc
+  example jarExample
+  example jarExampleJavadoc
+  example jarExampleSource
 }
 
 task copyRuntimeDependencies(type: Copy) {
