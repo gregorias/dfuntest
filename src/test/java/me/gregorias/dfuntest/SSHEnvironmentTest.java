@@ -227,6 +227,61 @@ public class SSHEnvironmentTest {
   }
 
   @Test
+  public void runCommandFromPwdShouldExecProperCommand() throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+
+    List<String> command = new ArrayList<>();
+    command.add("touch");
+    command.add("FILE");
+    mSSHEnv.runCommand(command, ".");
+    verify(mockSession).exec(contains("touch FILE"));
+    verify(mMockSSHClient).disconnect();
+  }
+
+  @Test
+  public void runCommandFromPwdShouldNotThrowOnDisconnectFailure()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    doThrow(IOException.class).when(mMockSSHClient).disconnect();
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    Command mockCommand = mock(Command.class);
+    when(mockSession.exec(anyString())).thenReturn(mockCommand);
+
+    List<String> command = new ArrayList<>();
+    command.add("touch");
+    command.add("FILE");
+    mSSHEnv.runCommand(command, ".");
+  }
+
+  @Test(expected = IOException.class)
+  public void runCommandFromPwdShouldThrowOnConnectFailure()
+      throws IOException, InterruptedException {
+    doThrow(IOException.class).when(mMockSSHClient).connect(any(InetAddress.class));
+
+    List<String> command = new ArrayList<>();
+    command.add("touch");
+    command.add("FILE");
+    mSSHEnv.runCommand(command, ".");
+  }
+
+  @Test(expected = IOException.class)
+  public void runCommandFromPwdShouldThrowOnCommandFailure()
+      throws IOException, InterruptedException {
+    Session mockSession = mock(Session.class);
+    when(mMockSSHClient.startSession()).thenReturn(mockSession);
+    when(mockSession.exec(anyString())).thenThrow(ConnectionException.class);
+
+    List<String> command = new ArrayList<>();
+    command.add("touch");
+    command.add("FILE");
+    mSSHEnv.runCommand(command, ".");
+  }
+
+  @Test
   public void runCommandShouldConnectProperly() throws IOException, InterruptedException {
     Session mockSession = mock(Session.class);
     when(mMockSSHClient.startSession()).thenReturn(mockSession);

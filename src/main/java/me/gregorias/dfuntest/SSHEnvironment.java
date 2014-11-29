@@ -121,6 +121,10 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     return mRemoteInetAddress.getHostName();
   }
 
+  public String getRemoteHomePath() {
+    return mRemoteHomePath;
+  }
+
   /**
    * Create directories in environment if they don't exist. If directoryPath consists of several
    * directories all required parent directories are created as well.
@@ -171,6 +175,29 @@ public class SSHEnvironment extends AbstractConfigurationEnvironment {
     if (exitCode != 0) {
       throw new IOException(String.format("Removal of %s has ended with failure exit code: %d",
           relPath, exitCode));
+    }
+  }
+
+  /**
+   * Run arbitrary command from selected current directory.
+   *
+   * @param command Command to run.
+   * @param pwdDir Directory from which command will be executed
+   * @return exit status of command
+   * @throws IOException
+   */
+  public int runCommand(List<String> command, String pwdDir) throws IOException {
+    SSHClient ssh = connectWithSSH();
+    try {
+      return runCommand(command, ssh, pwdDir);
+    } catch (IOException e) {
+      throw e;
+    } finally {
+      try {
+        ssh.disconnect();
+      } catch (IOException ioException) {
+        LOGGER.warn("runCommand(): Could not disconnect ssh.", ioException);
+      }
     }
   }
 

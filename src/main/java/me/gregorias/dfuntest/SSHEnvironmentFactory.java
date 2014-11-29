@@ -82,6 +82,22 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
 
   @Override
   public void destroy(Collection<Environment> envs) {
+    String errorMsg = "destroy(): Could not destroy environment due to exception.";
+    for (Environment env : envs) {
+      SSHEnvironment ssh = (SSHEnvironment) env;
+      try {
+        List<String> command = new ArrayList<>();
+        command.add("rmdir");
+        command.add(ssh.getRemoteHomePath());
+        int exitStatus = ssh.runCommand(command, ".");
+        if (exitStatus != 0) {
+          LOGGER.error("destroy(): rmdir command has failed with status {}.", exitStatus);
+        }
+      } catch (IOException e) {
+        LOGGER.error(errorMsg, e);
+      }
+    }
+
     LOGGER.info("destroy()");
   }
 }
