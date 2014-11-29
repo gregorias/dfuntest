@@ -44,7 +44,7 @@ public class GuiceTestRunnerModuleTest {
   public void addingPropertiesShouldAllowToInstantiateThemLater() {
     String[] keys = {"a.b", "b0.b", "b1.b"};
     String[] values = {"a.bValue", "b0.bValue", "b1.bValue"};
-    GuiceTestRunnerModule<Environment, App<Environment>> module = new GuiceTestRunnerModule<>();
+    GuiceTestRunnerModule module = new GuiceTestRunnerModule();
     module.addProperty(keys[0], values[0]);
     Map<String, String> properties = new HashMap<>();
     properties.put(keys[1], values[1]);
@@ -62,7 +62,7 @@ public class GuiceTestRunnerModuleTest {
   public void stringShouldBeCollectionOfStrings() {
     String key = "a";
     String value = "a, b, c";
-    GuiceTestRunnerModule<Environment, App<Environment>> module = new GuiceTestRunnerModule<>();
+    GuiceTestRunnerModule module = new GuiceTestRunnerModule();
     module.addProperty(key, value);
     Injector injector = Guice.createInjector(module);
     Collection<String> collectionOfStrings =
@@ -78,7 +78,7 @@ public class GuiceTestRunnerModuleTest {
   public void stringShouldBeConvertedToPath() {
     String key = "a";
     String value = "b";
-    GuiceTestRunnerModule<Environment, App<Environment>> module = new GuiceTestRunnerModule<>();
+    GuiceTestRunnerModule module = new GuiceTestRunnerModule();
     module.addProperty(key, value);
     Injector injector = Guice.createInjector(module);
     Path path = injector.getInstance(Key.get(Path.class, Names.named(key)));
@@ -87,7 +87,7 @@ public class GuiceTestRunnerModuleTest {
 
   @Test
   public void fileUtilsImplShouldBeProvided() {
-    GuiceTestRunnerModule<Environment, App<Environment>> module = new GuiceTestRunnerModule<>();
+    GuiceTestRunnerModule module = new GuiceTestRunnerModule();
     Injector injector = Guice.createInjector(module);
     FileUtils fileUtils = injector.getInstance(FileUtils.class);
     assertThat(fileUtils, instanceOf(FileUtilsImpl.class));

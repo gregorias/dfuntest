@@ -7,8 +7,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
-import me.gregorias.dfuntest.App;
-import me.gregorias.dfuntest.Environment;
 import me.gregorias.dfuntest.util.FileUtils;
 import me.gregorias.dfuntest.util.FileUtilsImpl;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -34,8 +32,7 @@ import java.util.Stack;
  * (using comma as separator) and automatic properties generation.
  * </p>
  */
-public class GuiceTestRunnerModule<EnvironmentT extends Environment,
-    AppT extends App<EnvironmentT>> extends AbstractModule {
+public class GuiceTestRunnerModule extends AbstractModule {
   private final Map<String, String> mProperties = new HashMap<>();
 
   /**

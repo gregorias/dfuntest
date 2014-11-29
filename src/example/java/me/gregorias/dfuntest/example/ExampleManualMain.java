@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -37,8 +37,8 @@ import java.util.concurrent.Executors;
  * Either:
  * <ul>
  *   <li>local ENV_COUNT - run tests locally with ENV_COUNT environments</li>
- *   <li>ssh USERNAME PRIVATE_KEY_PATH HOSTS... - run tests on given ssh hosts which are accessible for
- *     USERNAME user with given private key</li>
+ *   <li>ssh USERNAME PRIVATE_KEY_PATH HOSTS... - run tests on given ssh hosts which are accessible
+ *     for USERNAME user with given private key</li>
  * </ul>
  * </p>
  *
@@ -66,7 +66,7 @@ public class ExampleManualMain {
     }
 
     int initialPort = Integer.parseInt(args[0]);
-    EnvironmentFactory<Environment> environmentFactory = null;
+    EnvironmentFactory<Environment> environmentFactory;
     environmentFactory = initializeEnvironmentFactory(args);
     if (environmentFactory == null) {
       System.exit(1);
@@ -120,10 +120,7 @@ public class ExampleManualMain {
           LOGGER.error(USAGE);
           return null;
         }
-        Collection<String> hosts = new ArrayList<>();
-        for (int idx = 4; idx < args.length; ++idx) {
-          hosts.add(args[idx]);
-        }
+        Collection<String> hosts = Arrays.asList(Arrays.copyOfRange(args, 4, args.length));
         return new SSHEnvironmentFactory(hosts,
             args[2],
             FileSystems.getDefault().getPath(args[3]),

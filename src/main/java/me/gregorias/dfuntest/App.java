@@ -22,7 +22,7 @@ public abstract class App<EnvironmentT extends Environment> {
   /**
    * @return Underlying environment
    */
-  public abstract Environment getEnvironment();
+  public abstract EnvironmentT getEnvironment();
 
   /**
    * @return Number identifying this application.
@@ -41,11 +41,13 @@ public abstract class App<EnvironmentT extends Environment> {
   /**
    * Starts the application and allows it to run in background.
    */
+  @SuppressWarnings("unused")
   public abstract void startUp() throws CommandException, IOException;
 
   /**
    * Shuts down started application and deallocates all resources associated
    * with running application.
    */
+  @SuppressWarnings("unused")
   public abstract void shutDown() throws IOException, InterruptedException;
 }

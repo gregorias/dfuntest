@@ -42,28 +42,44 @@ public class ExampleEnvironmentPreparator implements EnvironmentPreparator<Envir
   }
 
   @Override
-  public void clean(Collection<Environment> envs) {
+  public void cleanAll(Collection<Environment> envs) {
+    String errorMsg = "cleanAll(): Could not clean environment.";
+    cleanOutput(envs);
     for (Environment env : envs) {
       try {
-        env.removeFile(ExampleApp.LOG_FILE);
         env.removeFile("lib");
         env.removeFile("dfuntest-example.jar");
       } catch (IOException e) {
-        LOGGER.error("clean(): Could not clean environment.", e);
+        LOGGER.error(errorMsg, e);
       } catch (InterruptedException e) {
-        LOGGER.warn("clean(): Could not clean environment.", e);
+        LOGGER.warn(errorMsg, e);
         Thread.currentThread().interrupt();
       }
     }
   }
 
   @Override
-  public void collectOutputAndLogFiles(Collection<Environment> envs, Path destPath) {
+  public void cleanOutput(Collection<Environment> envs) {
+    String errorMsg = "cleanOutput(): Could not clean output in environment.";
+    for (Environment env : envs) {
+      try {
+        env.removeFile(ExampleApp.LOG_FILE);
+      } catch (IOException e) {
+        LOGGER.error(errorMsg, e);
+      } catch (InterruptedException e) {
+        LOGGER.warn(errorMsg, e);
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
+  @Override
+  public void collectOutput(Collection<Environment> envs, Path destPath) {
     for (Environment env : envs) {
       try {
         env.copyFilesToLocalDisk(ExampleApp.LOG_FILE, destPath.resolve(env.getId() + ""));
       } catch (IOException e) {
-        LOGGER.warn("collectOutputAndLogFiles(): Could not copy log file.", e);
+        LOGGER.warn("collectOutput(): Could not copy log file.", e);
       }
     }
   }
@@ -80,9 +96,9 @@ public class ExampleEnvironmentPreparator implements EnvironmentPreparator<Envir
         env.copyFilesFromLocalDisk(LIBS_PATH.toAbsolutePath(), targetPath);
         preparedEnvs.add(env);
       } catch (IOException e) {
-        clean(preparedEnvs);
+        cleanAll(preparedEnvs);
         LOGGER.error("prepare() -> Could not prepare environment.", e);
-        throw new IOException(e);
+        throw e;
       }
     }
   }

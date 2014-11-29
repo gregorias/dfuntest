@@ -54,7 +54,7 @@ public class MultiTestRunnerTest {
   }
 
   @Test
-  public void runShouldPrepareAndDestroyProperly() throws IOException {
+  public void runShouldPrepareAndDestroyInOrder() throws IOException {
     Collection<Environment> envs = new ArrayList<>();
     Environment mockEnv = mock(Environment.class);
     envs.add(mockEnv);
@@ -72,9 +72,25 @@ public class MultiTestRunnerTest {
     inOrder.verify(mMockEnvironmentPreparator).prepare(eq(envs));
     inOrder.verify(mMockApplicationFactory).newApp(any(Environment.class));
     inOrder.verify(mMockTestScript).run(anyCollection());
-    inOrder.verify(mMockEnvironmentPreparator).clean(eq(envs));
+    inOrder.verify(mMockEnvironmentPreparator).collectOutput(eq(envs), any(Path.class));
+    inOrder.verify(mMockEnvironmentPreparator).cleanAll(eq(envs));
     inOrder.verify(mMockEnvironmentFactory).destroy(eq(envs));
     assertEquals(TestResult.Type.SUCCESS, result.getType());
+  }
+
+  @Test
+  public void runShouldNotCallRedundantPreparationAndCleaningMethods() throws IOException {
+    Collection<Environment> envs = new ArrayList<>();
+    Environment mockEnv = mock(Environment.class);
+    envs.add(mockEnv);
+    when(mMockEnvironmentFactory.create()).thenReturn(envs);
+    when(mMockTestScript.run(anyCollection())).thenReturn(
+        new TestResult(TestResult.Type.SUCCESS, "Success"));
+
+    mMultiTestRunner.run();
+
+    verify(mMockEnvironmentPreparator, never()).restore(anyCollection());
+    verify(mMockEnvironmentPreparator, never()).cleanOutput(anyCollection());
   }
 
   @Test
@@ -98,7 +114,7 @@ public class MultiTestRunnerTest {
   }
 
   @Test
-  public void runShouldOnlyCallRestoreIfSetInConstructor() throws IOException {
+  public void runShouldCallRestoreAndCleanOutputIfSetInConstructor() throws IOException {
     MultiTestRunner multiTestRunner = new MultiTestRunner<>(mMockTestScript,
         mMockEnvironmentFactory,
         mMockEnvironmentPreparator,
@@ -121,7 +137,8 @@ public class MultiTestRunnerTest {
     verify(mMockEnvironmentPreparator).restore(eq(envs));
     verify(mMockEnvironmentPreparator, never()).prepare(anyCollection());
     verify(mMockTestScript).run(anyCollection());
-    verify(mMockEnvironmentPreparator, never()).clean(anyCollection());
+    verify(mMockEnvironmentPreparator).cleanOutput(eq(envs));
+    verify(mMockEnvironmentPreparator, never()).cleanAll(anyCollection());
     verify(mMockEnvironmentFactory, never()).destroy(anyCollection());
     assertEquals(TestResult.Type.SUCCESS, result.getType());
   }
@@ -157,7 +174,8 @@ public class MultiTestRunnerTest {
     verify(mMockEnvironmentPreparator, never()).prepare(anyCollection());
     verify(mMockTestScript).run(anyCollection());
     verify(secondMockTestScript).run(anyCollection());
-    verify(mMockEnvironmentPreparator, never()).clean(anyCollection());
+    verify(mMockEnvironmentPreparator, times(2)).cleanOutput(eq(envs));
+    verify(mMockEnvironmentPreparator, never()).cleanAll(anyCollection());
     verify(mMockEnvironmentFactory, never()).destroy(anyCollection());
     assertEquals(TestResult.Type.FAILURE, result.getType());
   }
@@ -193,7 +211,8 @@ public class MultiTestRunnerTest {
     verify(mMockEnvironmentPreparator).restore(eq(envs));
     verify(mMockTestScript).run(anyCollection());
     verify(secondMockTestScript).run(anyCollection());
-    verify(mMockEnvironmentPreparator, never()).clean(anyCollection());
+    verify(mMockEnvironmentPreparator, times(2)).cleanOutput(eq(envs));
+    verify(mMockEnvironmentPreparator, never()).cleanAll(anyCollection());
     verify(mMockEnvironmentFactory, never()).destroy(anyCollection());
   }
 
@@ -228,7 +247,7 @@ public class MultiTestRunnerTest {
     verify(mMockEnvironmentPreparator, never()).restore(anyCollection());
     verify(mMockTestScript).run(anyCollection());
     verify(secondMockTestScript).run(anyCollection());
-    verify(mMockEnvironmentPreparator, times(2)).clean(eq(envs));
+    verify(mMockEnvironmentPreparator, times(2)).cleanAll(eq(envs));
     verify(mMockEnvironmentFactory).destroy(eq(envs));
   }
 

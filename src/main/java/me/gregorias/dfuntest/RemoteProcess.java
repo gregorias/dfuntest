@@ -7,6 +7,7 @@ import java.io.OutputStream;
 /**
  * A process that may be running on a remote host.
  */
+@SuppressWarnings("unused")
 public interface RemoteProcess {
   /**
    * Forcibly terminates the process.

@@ -122,7 +122,7 @@ public class ExampleGuiceMain {
       return;
     }
 
-    GuiceTestRunnerModule<Environment, ExampleApp> guiceBaseModule = new GuiceTestRunnerModule<>();
+    GuiceTestRunnerModule guiceBaseModule = new GuiceTestRunnerModule();
     guiceBaseModule.addProperties(properties);
 
     ExampleGuiceModule guiceExampleModule = new ExampleGuiceModule();

@@ -20,8 +20,14 @@ import java.util.Set;
  * </p>
  *
  * <p>
- * It runs preparation methods on environments if shouldPrepareEnvironments flag is set and the
- * environment either hasn't been prepared or has been cleaned.
+ * It prepares the environment for the first time iff shouldPrepareEnvironments flag is set.
+ * Otherwise it always restores them.
+ *
+ * If both shouldPrepareEnvironments and shouldCleanEnvironments are set then environments are
+ * prepared and cleaned before and after every test. If shouldCleanEnvironments is set to false then
+ * only cleanOutput is called and environments are restored subsequently before next test.
+ *
+ * After all tests, environments are destroyed iff shouldCleanEnvironments flag is set to true.
  * </p>
  *
  * @author Grzegorz Milka
@@ -123,7 +129,7 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
           LOGGER.debug("run(): Restoring environments.");
           mEnvironmentPreparator.restore(envs);
         }
-        LOGGER.debug("run(): Environments prepared or restored successfully.");
+        LOGGER.debug("run(): Environments were prepared or restored successfully.");
       } catch (IOException e) {
         String errorMsg = String.format("Could not prepare environments for %s.",
             script.toString());
@@ -150,13 +156,17 @@ public class MultiTestRunner<EnvironmentT extends Environment, AppT extends App<
 
       LOGGER.debug("run(): Collecting output and log files.");
       Path testReportPath = mReportPath.resolve(script.toString());
-      mEnvironmentPreparator.collectOutputAndLogFiles(envs, testReportPath);
+      mEnvironmentPreparator.collectOutput(envs, testReportPath);
       saveResultToSummaryReportFile(scriptResult, script);
       saveResultToScriptReportFile(scriptResult, testReportPath);
+
       if (mShouldPrepareEnvironments && mShouldCleanEnvironments) {
-        LOGGER.debug("run(): Cleaning environments.");
-        mEnvironmentPreparator.clean(envs);
+        LOGGER.debug("run(): Cleaning environments completely.");
+        mEnvironmentPreparator.cleanAll(envs);
         hasPrepared = false;
+      } else {
+        LOGGER.debug("run(): Cleaning output in environments.");
+        mEnvironmentPreparator.cleanOutput(envs);
       }
     }
 
