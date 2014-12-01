@@ -111,12 +111,12 @@ task jarExample(type: Jar) {
 }
 
 task jarExampleJavadoc(type: Jar, dependsOn: javadocExample) {
-  classifier = 'javadocExample'
+  classifier = 'example-javadoc'
   from javadocExample.destinationDir
 }
 
 task jarExampleSource(type: Jar) {
-  classifier = 'exampleSources'
+  classifier = 'example-sources'
   from sourceSets.example.allSource
 }
 
