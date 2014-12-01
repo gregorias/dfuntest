@@ -215,7 +215,6 @@ public class ExampleGuiceMain {
 
     OptionBuilder.withLongOpt(ENV_FACTORY_OPTION);
     OptionBuilder.hasArg();
-    OptionBuilder.isRequired();
     OptionBuilder.withDescription("Environment factory name. Can be either local or ssh.");
 
     Option envFactoryOption = OptionBuilder.create();
@@ -296,7 +295,13 @@ public class ExampleGuiceMain {
           LOGGER.error("parseAndProcessArguments(): {}", errorMsg);
           throw new IllegalArgumentException(errorMsg);
       }
+    } else {
+      String errorMsg = String.format("--%s option is required. Use --help to get usage help.",
+          ENV_FACTORY_OPTION);
+      LOGGER.error("parseAndProcessArguments(): {}", errorMsg);
+      throw new IllegalArgumentException(errorMsg);
     }
+
     return properties;
   }
 
