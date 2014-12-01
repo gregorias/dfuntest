@@ -198,6 +198,17 @@ public class ExampleGuiceMain {
     return FileSystems.getDefault().getPath(REPORT_PATH_PREFIX + calculateCurrentTimeStamp());
   }
 
+  private static Map<String, String> constructPropertiesFromRootsChildren(
+      HierarchicalConfiguration config) {
+    Map<String, String> properties = new HashMap<>();
+    List<ConfigurationNode> rootsChildrenList = config.getRoot().getChildren();
+    for (ConfigurationNode child : rootsChildrenList) {
+      HierarchicalConfiguration subConfig = config.configurationAt(child.getName());
+      properties.putAll(GuiceTestRunnerModule.configurationToProperties(subConfig));
+    }
+    return properties;
+  }
+
   private static Options createOptions() {
     Options options = new Options();
 
@@ -236,7 +247,7 @@ public class ExampleGuiceMain {
     return properties;
   }
 
-  private static Map<String,String> parseAndProcessArguments(String[] args)
+  private static Map<String, String> parseAndProcessArguments(String[] args)
       throws ConfigurationException, ParseException {
     Map<String, String> properties = new HashMap<>();
     CommandLineParser parser = new BasicParser();
@@ -302,17 +313,6 @@ public class ExampleGuiceMain {
       throw new IllegalArgumentException(errorMsg);
     }
 
-    return properties;
-  }
-
-  private static Map<String, String> constructPropertiesFromRootsChildren(
-      HierarchicalConfiguration config) {
-    Map<String, String> properties = new HashMap<>();
-    List<ConfigurationNode> rootsChildrenList = config.getRoot().getChildren();
-    for (ConfigurationNode child : rootsChildrenList) {
-      HierarchicalConfiguration subConfig = config.configurationAt(child.getName());
-      properties.putAll(GuiceTestRunnerModule.configurationToProperties(subConfig));
-    }
     return properties;
   }
 }
