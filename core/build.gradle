@@ -15,7 +15,7 @@ if (!hasProperty('ossrhUsername')) {
 }
 
 group = 'me.gregorias'
-version = '0.6'
+version = '0.6.1'
 
 repositories {
   mavenCentral()
@@ -155,7 +155,7 @@ def getPassword = { target ->
 }
 
 gradle.taskGraph.beforeTask { taskGraph ->
-  if (taskGraph.project.name.equals('dfuntest')) {
+  if (taskGraph.project.name.equals('core')) {
     if (taskGraph.equals(signArchives) &&
         gradle.taskGraph.hasTask(uploadArchives)) {
       ext."signing.password" = getPassword("PGP private key")
