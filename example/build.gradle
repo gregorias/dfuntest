@@ -1,0 +1,48 @@
+apply plugin: 'java'
+
+def DEPENDENCY_LIB_DIRECTORY = 'lib/'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile project(':core')
+  compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
+  runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.10'
+  runtime group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+}
+
+compileJava {
+  sourceCompatibility = '1.7'
+  targetCompatibility = '1.7'
+}
+
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'me.gregorias.dfuntest.example.ExampleGuiceMain',
+               'Class-Path': generateClassPath(configurations.runtime,
+                 DEPENDENCY_LIB_DIRECTORY)
+  }
+}
+
+task jarJavadoc(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+task jarSource(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives jarSource
+  archives jarJavadoc
+}
+
+task copyRuntimeDependencies(type: Copy) {
+  from configurations.runtime
+  into DEPENDENCY_LIB_DIRECTORY
+}

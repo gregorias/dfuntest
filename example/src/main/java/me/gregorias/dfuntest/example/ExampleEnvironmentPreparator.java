@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -87,9 +88,15 @@ public class ExampleEnvironmentPreparator implements EnvironmentPreparator<Envir
   @Override
   public void prepare(Collection<Environment> envs) throws IOException {
     LOGGER.info("prepare()");
+
+    if (envs.isEmpty()) {
+      throw new IllegalArgumentException("Collection of environments is empty.");
+    }
+
+    String serverHostname = getServerHostname(envs);
     Collection<Environment> preparedEnvs = new LinkedList<>();
     for (Environment env : envs) {
-      prepareEnvConfiguration(env);
+      prepareEnvConfiguration(env, serverHostname);
       try {
         String targetPath = ".";
         env.copyFilesFromLocalDisk(JAR_PATH.toAbsolutePath(), targetPath);
@@ -108,10 +115,15 @@ public class ExampleEnvironmentPreparator implements EnvironmentPreparator<Envir
     LOGGER.info("restore()");
   }
 
-  private void prepareEnvConfiguration(Environment env) {
+  private String getServerHostname(Collection<Environment> envs) {
+    Iterator<Environment> environmentIterator = envs.iterator();
+    return environmentIterator.next().getHostname();
+  }
+
+  private void prepareEnvConfiguration(Environment env, String serverHostname) {
     int portSkew = env.getId();
     env.setProperty(ExampleApp.LOCAL_PORT_ENV_FIELD, mInitialPort + portSkew);
-    env.setProperty(ExampleApp.SERVER_HOSTNAME_ENV_FIELD, env.getHostname());
+    env.setProperty(ExampleApp.SERVER_HOSTNAME_ENV_FIELD, serverHostname);
     env.setProperty(ExampleApp.SERVER_PORT_ENV_FIELD, mInitialPort);
   }
 }

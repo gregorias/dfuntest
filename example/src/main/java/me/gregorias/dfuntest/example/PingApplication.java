@@ -91,6 +91,9 @@ public class PingApplication implements Runnable {
         LOGGER.error("Incorrect arguments provided.");
         return;
       }
+      LOGGER.info("main(): id={}, localPort={}, hostname={}, remotePort={}", id, localPort,
+          hostname,
+          remotePort);
       InetSocketAddress serverSocketAddress = new InetSocketAddress(hostname, remotePort);
       PingApplication app = new PingApplication(id, localPort, serverSocketAddress);
       app.run();
@@ -150,7 +153,6 @@ public class PingApplication implements Runnable {
     synchronized (mPingedIDs) {
       if (!mPingedIDs.contains(pingID)) {
         mPingedIDs.add(pingID);
-        mResponseBuffer.capacity();
         ByteBuffer updatedByteBuffer = ByteBuffer.allocateDirect(
             mResponseBuffer.capacity() + INTEGER_BYTE_SIZE);
         updatedByteBuffer.put(mResponseBuffer);

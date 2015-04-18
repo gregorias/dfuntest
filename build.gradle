@@ -1,254 +1,46 @@
-// Properties ossrhUsername, signing.keyId and signing.secretKeyRingFile need to
-// be set in order to sign and upload archives.
-
-import groovy.swing.SwingBuilder
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'checkstyle'
-apply plugin: 'findbugs'
-apply plugin: 'jacoco'
 apply plugin: 'maven'
-apply plugin: 'pmd'
-apply plugin: 'signing'
 
-def DEPENDENCY_LIB_DIRECTORY = 'lib/'
+def configDir = new File(rootDir, 'config')
 
-if (!hasProperty('ossrhUsername')) {
-  ext.ossrhUsername = ''
-}
-
-group = 'me.gregorias'
-version = '0.6'
-
-sourceSets {
-  example
-}
-
-configurations {
-  example
-  exampleCompile.extendsFrom compile
-  exampleRuntime.extendsFrom runtime
-}
-
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  compile group: 'com.google.inject', name: 'guice', version: '4.0-beta5'
-  compile group: 'com.google.inject.extensions', name: 'guice-multibindings', version: '4.0-beta5'
-  compile group: 'commons-configuration', name: 'commons-configuration', version: '1.10'
-  compile group: 'commons-io', name: 'commons-io', version: '2.4'
-  compile group: 'net.schmizz', name: 'sshj', version: '0.10.0'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
-  testCompile group: 'junit', name: 'junit', version: '4.11'
-  testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.8'
-  exampleCompile files(jar.archivePath)
-  exampleCompile group: 'commons-cli', name: 'commons-cli', version: '1.2'
-  runtime group: 'com.jcraft', name: 'jzlib', version: '1.1.3'
-  exampleRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.7'
-  exampleRuntime group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+allprojects {
+  apply plugin: 'eclipse'
 }
 
 idea {
-  module {
-    scopes.COMPILE.plus += [configurations.compile, configurations.exampleCompile]
+  project {
+    languageLevel = '1.7'
   }
 }
 
-compileJava {
-  sourceCompatibility = '1.7'
-  targetCompatibility = '1.7'
-}
+subprojects {
+  apply plugin: 'checkstyle'
+  apply plugin: 'findbugs'
+  apply plugin: 'idea'
+  apply plugin: 'pmd'
 
-compileTestJava {
-  sourceCompatibility = '1.7'
-  targetCompatibility = '1.7'
-}
-
-compileExampleJava {
-  sourceCompatibility = '1.7'
-  targetCompatibility = '1.7'
-}
-
-task javadocExample(type: Javadoc) {
-  classpath = configurations.exampleCompile
-  destinationDir = new File("${project.docsDir}/javadocExample")
-  source sourceSets.example.allJava;
-}
-
-jacoco {
-  toolVersion = '0.7.2.201409121644'
-}
-
-jacocoTestReport {
-  dependsOn test
-  reports {
-    html.enabled true
+  checkstyle {
+    toolVersion = '6.4.1'
+    configFile = new File(configDir, "checkstyle/checkstyle.xml")
   }
-}
 
-task jarJavadoc(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from javadoc.destinationDir
-}
-
-task jarSource(type: Jar) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-task jarExample(type: Jar) {
-  classifier = 'example'
-  from sourceSets.example.output
-  manifest {
-    attributes 'Main-Class': 'me.gregorias.dfuntest.example.ExampleGuiceMain',
-               'Class-Path': generateClassPath(configurations.exampleRuntime,
-                 DEPENDENCY_LIB_DIRECTORY)
+  findbugs {
+    effort = "max"
+    reportLevel = "low"
+    toolVersion = "3.0.1"
   }
-}
 
-task jarExampleJavadoc(type: Jar, dependsOn: javadocExample) {
-  classifier = 'example-javadoc'
-  from javadocExample.destinationDir
-}
-
-task jarExampleSource(type: Jar) {
-  classifier = 'example-sources'
-  from sourceSets.example.allSource
-}
-
-artifacts {
-  archives jarSource
-  archives jarJavadoc
-  example jarExample
-  example jarExampleJavadoc
-  example jarExampleSource
-}
-
-task copyRuntimeDependencies(type: Copy) {
-  from configurations.runtime
-  into DEPENDENCY_LIB_DIRECTORY
-}
-
-task copyExampleRuntimeDependencies(type: Copy) {
-  from configurations.exampleRuntime
-  into DEPENDENCY_LIB_DIRECTORY
-}
-
-findbugs {
-  effort = "max"
-  reportLevel = "low"
-  toolVersion = "3.0.0"
-}
-
-tasks.withType(FindBugs) {
-  reports {
-    xml.enabled = false
-    html.enabled = true
+  tasks.withType(FindBugs) {
+    reports {
+      xml.enabled = false
+      html.enabled = true
+    }
   }
 }
 
 /* Generate gradlew and gradle wrappers for portable gradle use */
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.2.1'
-}
-
-signing {
-  required { gradle.taskGraph.hasTask(uploadArchives) }
-  sign configurations.archives
-}
-
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment {
-        MavenDeployment deployment -> signing.signPom(deployment)
-      }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-        authentication(userName: ossrhUsername)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-        authentication(userName: ossrhUsername)
-      }
-
-      pom.project {
-        name 'dfuntest'
-        description 'Framework for distributed functional tests.'
-        url 'http://github.com/gregorias/dfuntest'
-
-        licenses {
-          license {
-            name 'The BSD 2-Clause License'
-            url 'http://opensource.org/licenses/BSD-2-Clause'
-          }
-        }
-
-        developers {
-          developer {
-            name 'Grzegorz Milka'
-            email 'grzegorzmilka@gmail.com'
-          }
-        }
-
-        scm {
-          connection 'scm:git:git@github.com:gregorias/dfuntest.git'
-          developerConnection 'scm:git:git@github.com:gregorias/dfuntest.git'
-          url 'git@github.com:gregorias/dfuntest.git'
-        }
-      }
-    }
-  }
-}
-
-def getPassword = { target ->
-  def pass = ''
-  def prompt = "\nPlease enter password for ${target}: "
-  if (System.console() == null) {
-    new SwingBuilder().edt {
-      dialog(modal: true,
-          title: 'Enter password',
-          alwaysOnTop: true,
-          resizable: false,
-          locationRelativeTo: null,
-          pack: true,
-          show: true
-      ) {
-        vbox {
-          label(text: prompt)
-          input = passwordField()
-          button(defaultButton: true, text: 'OK', actionPerformed: {
-            pass = input.password;
-            dispose();
-          })
-        }
-      }
-    }
-  } else {
-    pass = System.console().readPassword(prompt)
-  }
-  // This is necessary, because SWT for example does not return real String and
-  // may be invalidated.
-  pass = new String(pass)
-}
-
-gradle.taskGraph.beforeTask { taskGraph ->
-  if (taskGraph.project.name.equals('dfuntest')) {
-    if (taskGraph.equals(signArchives) &&
-        gradle.taskGraph.hasTask(uploadArchives)) {
-      ext."signing.password" = getPassword("PGP private key")
-    } else if (taskGraph.equals(uploadArchives)) {
-      def ossrhPassword = getPassword("OSSRH")
-      uploadArchives.repositories.mavenDeployer {
-        repository.authentication.password = ossrhPassword
-        snapshotRepository.authentication.password = ossrhPassword
-      }
-    }
-  }
+  gradleVersion = '2.3'
 }
 
 def generateClassPath(configurationSet, prefix) {
