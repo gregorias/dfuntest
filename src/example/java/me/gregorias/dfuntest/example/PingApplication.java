@@ -113,7 +113,7 @@ public class PingApplication implements Runnable {
       while (!mIsClosed) {
         LOGGER.debug("run(): Ready to handle new connection.");
         try (SocketChannel socketChannel = serverSocketChannel.accept()) {
-          LOGGER.debug("run(): Accepted new connection.");
+          LOGGER.debug("run(): Accepted new connection from {}.", socketChannel.getRemoteAddress());
           socketChannel.configureBlocking(true);
           handleClientConnection(socketChannel);
         }

@@ -99,7 +99,12 @@ public class GuiceTestRunnerModule extends AbstractModule {
       mPrefixes.push(node.getName());
       if (node.getValue() != null) {
         String key = StringUtils.join(mPrefixes, ".");
-        mProperties.put(key, (String) node.getValue());
+        if (mProperties.containsKey(key)) {
+          String value = mProperties.get(key);
+          mProperties.put(key, String.format("%s, %s", value, (String) node.getValue()));
+        } else {
+          mProperties.put(key, (String) node.getValue());
+        }
       }
     }
 

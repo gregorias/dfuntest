@@ -71,7 +71,7 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
           mUsername,
           mPrivateKeyPath,
           hostInetAddress,
-          mRemoteDir,
+          String.format("%s%04d", mRemoteDir, envIdx),
           mExecutor,
           SSHClientFactory.getSSHClientFactory(),
           FileUtilsImpl.getFileUtilsImpl());
@@ -98,6 +98,6 @@ public class SSHEnvironmentFactory implements EnvironmentFactory<Environment> {
       }
     }
 
-    LOGGER.info("destroy()");
+    LOGGER.info("destroy() -> void");
   }
 }
