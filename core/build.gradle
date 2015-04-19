@@ -96,6 +96,7 @@ uploadArchives {
 
       pom.project {
         name 'dfuntest'
+        artifactId 'dfuntest'
         description 'Framework for distributed functional tests.'
         url 'http://github.com/gregorias/dfuntest'
 
