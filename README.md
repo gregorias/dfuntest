@@ -24,7 +24,7 @@ dfuntest is available in central Maven repository under following credentials:
 
     groupId: me.gregorias
     artifactId: dfuntest
-    version: 0.6
+    version: 0.6.1
 
 dfuntest architecture is based on easily implementable interfaces, some of which
 are provided by dfuntest and others need to be implemented to fit into
